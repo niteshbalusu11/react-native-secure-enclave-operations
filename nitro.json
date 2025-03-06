@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["secureenclaveoperations"],
+  "ios": {
+    "iosModuleName": "SecureEnclaveOperations"
+  },
+  "android": {
+    "androidNamespace": ["secureenclaveoperations"],
+    "androidCxxLibName": "secureenclaveoperations"
+  },
+  "autolinking": {
+    "SecureEnclaveOperations": {
+      "swift": "SecureEnclaveOperations",
+      "kotlin": "SecureEnclaveOperations"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
