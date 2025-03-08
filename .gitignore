@@ -6,7 +6,6 @@
 .expo/
 
 # VSCode
-.vscode/
 jsconfig.json
 
 # Xcode
@@ -85,4 +84,5 @@ android/generated
 # React Native Nitro Modules
 nitrogen/
 
+# Nix and direnv
 .direnv/

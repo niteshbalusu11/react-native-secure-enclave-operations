@@ -1,5 +1,5 @@
 package com.margelo.nitro.secureenclaveoperations
-  
+
 import com.facebook.proguard.annotations.DoNotStrip
 
 @DoNotStrip
