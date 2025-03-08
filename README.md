@@ -1,7 +1,8 @@
 # react-native-secure-enclave-operations
 
 Perform cryptographic operations using Apple's Secure Enclave and App Attestation with React Native.
-Important node: App attestation service does not work on emulators, you will need to connect a real device.
+
+<b>Important Note: App attestation service does not work on emulators, you will need to connect a real device.</b>
 
 ## Features
 
@@ -24,14 +25,13 @@ npm install react-native-secure-enclave-operations react-native-nitro-modules
 
 > `react-native-nitro-modules` is required as this library relies on [Nitro Modules](https://nitro.margelo.com/).
 
-
 ## Platform Support
 
-| Platform | Support                     |
-| -------- | --------------------------- |
-| iOS      | ✅                          |
-| macOS    | ✅                          |
-| Android  | ❌ (Work in progress)       |
+| Platform | Support               |
+| -------- | --------------------- |
+| iOS      | ✅                    |
+| macOS    | ✅                    |
+| Android  | ❌ (Work in progress) |
 
 ## API Reference
 
@@ -66,8 +66,8 @@ function attestKey(keyId: string, challenge: string): Promise<string>;
  * @returns Promise<string> - Base64-encoded assertion object to send to your server
  */
 function generateAssertion(
-  keyId: string, 
-  challenge: string, 
+  keyId: string,
+  challenge: string,
   data: string
 ): Promise<string>;
 ```
@@ -81,7 +81,7 @@ import {
   isAttestationSupported,
   generateKey,
   attestKey,
-  generateAssertion
+  generateAssertion,
 } from 'react-native-secure-enclave-operations';
 
 // Check if device supports App Attestation
@@ -100,14 +100,17 @@ const challengeFromServer = 'unique-challenge-from-your-server';
 const attestationObject = await attestKey(keyId, challengeFromServer);
 
 // Send attestationObject to your server for verification
-const verified = await sendAttestationToServer(attestationObject, challengeFromServer);
+const verified = await sendAttestationToServer(
+  attestationObject,
+  challengeFromServer
+);
 
 // Use the attested key to sign requests
 const requestData = JSON.stringify({ userId: 123, action: 'get_data' });
 const requestChallenge = 'another-unique-challenge-from-server';
 const assertionObject = await generateAssertion(
-  keyId, 
-  requestChallenge, 
+  keyId,
+  requestChallenge,
   requestData
 );
 
@@ -117,9 +120,9 @@ const response = await fetch('https://api.yourserver.com/secure-endpoint', {
   headers: {
     'Content-Type': 'application/json',
     'X-App-Attest-Assertion': assertionObject,
-    'X-App-Attest-Challenge': requestChallenge
+    'X-App-Attest-Challenge': requestChallenge,
   },
-  body: requestData
+  body: requestData,
 });
 ```
 
