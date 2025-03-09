@@ -48,14 +48,14 @@ type VerifyAssertionArgs = {
   assertion: string;
   challenge: string;
   keyId: string;
-  message?: string; // Optional message content
+  message: string;
 };
 
 export const verifyAssertion = async ({
   assertion,
   challenge,
   keyId,
-  message = 'Hello server',
+  message,
 }: VerifyAssertionArgs) => {
   try {
     // Create authentication header content
@@ -64,14 +64,12 @@ export const verifyAssertion = async ({
       assertion,
     };
 
-    // Base64 encode the authentication info using btoa for React Native
+    // Base64 encode the authentication info
     const authHeader = btoa(JSON.stringify(authContent));
 
-    // Create the message payload including the challenge
-    const messagePayload = {
+    const clientData = {
+      data: message,
       challenge,
-      message,
-      timestamp: new Date().toISOString(),
     };
 
     const response = await fetch(`http://${serverUrl}/v1/send-message`, {
@@ -80,7 +78,7 @@ export const verifyAssertion = async ({
         'Content-Type': 'application/json',
         'Authentication': authHeader,
       },
-      body: JSON.stringify(messagePayload),
+      body: JSON.stringify(clientData),
     });
 
     console.log(

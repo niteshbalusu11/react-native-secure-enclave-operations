@@ -52,18 +52,21 @@ export default function App() {
       // Generate another challenge for subsequent assertions
       const challenge = await getChallenge();
 
-      const res = await generateAssertion(
+      const message = 'some data to sign';
+
+      const assertion = await generateAssertion(
         generatedKey,
         challenge,
-        'some data to sign'
+        message
       );
-      console.log('assertion result is ', res);
+      console.log('assertion result is ', assertion);
 
       // Verify assertion
       await verifyAssertion({
-        assertion: res,
+        assertion,
         challenge,
         keyId: generatedKey,
+        message,
       });
     } catch (err) {
       console.error('error generating assertion', err);
