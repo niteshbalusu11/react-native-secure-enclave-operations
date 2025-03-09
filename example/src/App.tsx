@@ -6,15 +6,16 @@ import {
   attestKey,
   generateAssertion,
 } from 'react-native-secure-enclave-operations';
+import { getChallenge, verifyAssertion, verifyAttestation } from './fetch';
 
 export default function App() {
   const [generatedKey, setGeneratedKey] = useState('');
 
   const isAvailable = async () => {
     try {
-      const isAvailable = await isAttestationSupported();
+      const isSupported = await isAttestationSupported();
 
-      console.log('is available', isAvailable);
+      console.log('is available', isSupported);
     } catch (err) {
       console.error('is available error', err);
     }
@@ -31,8 +32,16 @@ export default function App() {
 
   const attestKeyWithApple = async () => {
     try {
-      const key = await attestKey(generatedKey, 'some challenge');
-      console.log('generated pubkey is ', key);
+      // Generate a unique challenge from server to attest key
+      const challenge = await getChallenge();
+      const appleAttestation = await attestKey(generatedKey, challenge);
+      console.log('apple attestation is ', appleAttestation);
+
+      await verifyAttestation({
+        attestation: appleAttestation,
+        challenge,
+        keyId: generatedKey,
+      });
     } catch (err) {
       console.error('error attesting with apple', err);
     }
@@ -40,12 +49,22 @@ export default function App() {
 
   const genAssertion = async () => {
     try {
+      // Generate another challenge for subsequent assertions
+      const challenge = await getChallenge();
+
       const res = await generateAssertion(
         generatedKey,
-        'some challenge',
+        challenge,
         'some data to sign'
       );
       console.log('assertion result is ', res);
+
+      // Verify assertion
+      await verifyAssertion({
+        assertion: res,
+        challenge,
+        keyId: generatedKey,
+      });
     } catch (err) {
       console.error('error generating assertion', err);
     }

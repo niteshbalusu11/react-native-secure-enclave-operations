@@ -130,6 +130,10 @@ const response = await fetch('https://api.yourserver.com/secure-endpoint', {
 
 See the [example app](https://github.com/niteshbalusu11/react-native-secure-enclave-operations/tree/main/example).
 
+### Server side implementation
+See this library [node-app-attest](https://github.com/uebelack/node-app-attest)
+This is an example implementation [node-app-attest-example](https://github.com/uebelack/node-app-attest-example)
+
 ## Security Considerations
 
 - Store the key ID securely, preferably in the device's Keychain

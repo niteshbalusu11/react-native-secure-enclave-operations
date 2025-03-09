@@ -86,3 +86,6 @@ nitrogen/
 
 # Nix and direnv
 .direnv/
+
+# node-app-attest-example
+node-app-attest-example/
