@@ -153,6 +153,6 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation project(":react-native-nitro-modules")
 
-  // For a full implementation, you would add Google Play Integrity API dependency
+  // Note: For full implementation, uncomment the following:
   // implementation "com.google.android.play:integrity:1.2.0"
 }
