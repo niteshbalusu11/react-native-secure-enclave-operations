@@ -58,12 +58,7 @@ export function attestKey(keyId: string, challenge: string): Promise<string> {
  */
 export function generateAssertion(
   keyId: string,
-  challenge: string,
   data: string
 ): Promise<string> {
-  return SecureEnclaveOperationsHybridObject.generateAssertion(
-    keyId,
-    challenge,
-    data
-  );
+  return SecureEnclaveOperationsHybridObject.generateAssertion(keyId, data);
 }

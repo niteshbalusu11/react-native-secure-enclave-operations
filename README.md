@@ -61,13 +61,11 @@ function attestKey(keyId: string, challenge: string): Promise<string>;
 /**
  * Sign data with an attested key
  * @param keyId - Key identifier from generateKey()
- * @param challenge - Challenge from your server (should be unique per request)
  * @param data - Data to sign (usually your request payload)
  * @returns Promise<string> - Base64-encoded assertion object to send to your server
  */
 function generateAssertion(
   keyId: string,
-  challenge: string,
   data: string
 ): Promise<string>;
 ```

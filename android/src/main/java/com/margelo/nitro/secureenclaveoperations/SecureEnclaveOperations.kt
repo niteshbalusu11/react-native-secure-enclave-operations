@@ -184,17 +184,16 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
 
   override fun generateAssertion(
     keyId: String,
-    challenge: String,
     data: String
   ): Promise<String> {
     return Promise.async {
       try {
         Log.d(logTag, "Generating assertion for key: $keyId")
-        Log.d(logTag, "Challenge length: ${challenge.length}, Data length: ${data.length}")
+        Log.d(logTag, "Data length: ${data.length}")
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 
         // Create a request object with data and challenge
-        val requestData = mapOf("data" to data, "challenge" to challenge)
+        val requestData = mapOf("data" to data)
 
         // Convert to JSON
         val jsonData = JSONObject(requestData).toString()

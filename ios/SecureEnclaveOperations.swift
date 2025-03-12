@@ -4,9 +4,10 @@ import Foundation
 import NitroModules
 
 class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
-  
+
   // This function is not supported on iOS.
-  func prepareIntegrityTokenAndroid(cloudProjectNumber: String) throws -> NitroModules.Promise<Bool> {
+  func prepareIntegrityTokenAndroid(cloudProjectNumber: String) throws -> NitroModules.Promise<Bool>
+  {
     return Promise.async {
       // Create a specific error for unsupported platform functionality
       let platformError = NSError(
@@ -14,12 +15,12 @@ class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
         code: -100,
         userInfo: [NSLocalizedDescriptionKey: "Google Play Integrity API is not supported on iOS"]
       )
-      
+
       // Throw the error directly in the async block
       throw platformError
     }
   }
-  
+
   private let service = DCAppAttestService.shared
 
   public func isHardwareBackedKeyGenerationSupported() throws -> Promise<Bool> {
@@ -103,25 +104,18 @@ class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
     }
   }
 
-  public func generateAssertion(keyId: String, challenge: String, data: String) throws -> Promise<
+  public func generateAssertion(keyId: String, data: String) throws -> Promise<
     String
   > {
-    return Promise.async {
-      // Create a dictionary with the data and challenge
-      let requestData: [String: Any] = [
-        "data": data,
-        "challenge": challenge,
-      ]
-
-      // Convert the dictionary to JSON data
-      guard let jsonData = try? JSONSerialization.data(withJSONObject: requestData) else {
+    return Promise.async {      
+      guard let encodedClientData = data.data(using: .utf8) else {
         throw NSError(
           domain: "SecureEnclaveOperations", code: -6,
           userInfo: [NSLocalizedDescriptionKey: "Failed to serialize request data"])
       }
 
       // Create a SHA256 hash of the JSON data
-      let jsonDataHash = Data(SHA256.hash(data: jsonData))
+      let jsonDataHash = Data(SHA256.hash(data: encodedClientData))
 
       // Generate the assertion using async/await
       return try await withCheckedThrowingContinuation { continuation in

@@ -17,9 +17,5 @@ export interface SecureEnclaveOperations
   attestKey(keyId: string, challenge: string): Promise<string>;
 
   // Sign data using the attested key
-  generateAssertion(
-    keyId: string,
-    challenge: string,
-    data: string
-  ): Promise<string>;
+  generateAssertion(keyId: string, data: string): Promise<string>;
 }

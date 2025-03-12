@@ -75,10 +75,7 @@ export const verifyAssertion = async ({
     const body = {
       assertion,
       challenge,
-      payload: {
-        data: message,
-        challenge,
-      },
+      payload: clientData,
       keyId,
     };
 

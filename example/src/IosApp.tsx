@@ -54,10 +54,14 @@ export default function IosApp() {
 
       const message = 'some data to sign';
 
+      const data = {
+        data: message,
+        challenge: challenge,
+      };
+
       const assertion = await generateAssertion(
         generatedKey,
-        challenge,
-        message
+        JSON.stringify(data)
       );
       console.log('assertion result is ', assertion);
 
