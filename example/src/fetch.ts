@@ -1,15 +1,15 @@
 import { Platform } from 'react-native';
 
 const serverUrl =
-  Platform.OS === 'android' ? '192.168.6.199:3000' : '192.168.1.161:3000';
+  Platform.OS === 'android' ? '10.0.2.2:3000' : '192.168.1.161:3000';
 
 export const getChallenge = async () => {
   try {
-    const response = await fetch(`http://${serverUrl}/v1/attest/challenge`);
+    const response = await fetch(`http://${serverUrl}/attest/nonce`);
     const data = await response.json();
 
     console.log('challenge response', data);
-    return data.challenge;
+    return data.nonce;
   } catch (err) {
     console.error('error getting challenge', err);
   }
@@ -26,7 +26,7 @@ export const verifyAttestation = async ({
   keyId,
 }: VerifyAttestationArgs) => {
   try {
-    const response = await fetch(`http://${serverUrl}/v1/attest/verify`, {
+    const response = await fetch(`http://${serverUrl}/attest/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,13 +72,23 @@ export const verifyAssertion = async ({
       challenge,
     };
 
-    const response = await fetch(`http://${serverUrl}/v1/send-message`, {
+    const body = {
+      assertion,
+      challenge,
+      payload: {
+        data: message,
+        challenge,
+      },
+      keyId,
+    };
+
+    const response = await fetch(`http://${serverUrl}/assertion/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authentication': authHeader,
       },
-      body: JSON.stringify(clientData),
+      body: JSON.stringify(body),
     });
 
     console.log(

@@ -44,11 +44,8 @@ export default function AndroidApp() {
   const attestKeyWithAndroid = async () => {
     try {
       // Generate a unique challenge from server to attest key
-      // const challenge = await getChallenge();
-      const androidAttestation = await attestKey(
-        generatedKey,
-        'some challenge'
-      );
+      const challenge = await getChallenge();
+      const androidAttestation = await attestKey(generatedKey, challenge);
       console.log('android attestation is ', androidAttestation);
 
       // await verifyAttestation({
