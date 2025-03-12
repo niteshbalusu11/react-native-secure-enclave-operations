@@ -2,8 +2,13 @@ import type { HybridObject } from 'react-native-nitro-modules';
 
 export interface SecureEnclaveOperations
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
-  // Check if App Attestation is available on this device
-  isAttestationSupported(): Promise<boolean>;
+  // Check if hardware-backed key generation is available on this device
+  isHardwareBackedKeyGenerationSupported(): Promise<boolean>;
+
+  // ANDROID ONLY! Prepare an integrity token
+  // This needs to be called when the app starts
+  // Well before you try to attest a key
+  prepareIntegrityTokenAndroid(cloudProjectNumber: string): Promise<boolean>;
 
   // Generate a new key pair and returns the key identifier
   generateKey(): Promise<string>;

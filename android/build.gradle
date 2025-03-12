@@ -154,5 +154,5 @@ dependencies {
   implementation project(":react-native-nitro-modules")
 
   // Note: For full implementation, uncomment the following:
-  // implementation "com.google.android.play:integrity:1.2.0"
+   implementation "com.google.android.play:integrity:1.4.0"
 }

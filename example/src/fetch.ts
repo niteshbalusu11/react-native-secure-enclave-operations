@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 const serverUrl =
-  Platform.OS === 'android' ? '192.168.6.199:3000' : '192.168.6.199:3000';
+  Platform.OS === 'android' ? '192.168.6.199:3000' : '192.168.1.161:3000';
 
 export const getChallenge = async () => {
   try {

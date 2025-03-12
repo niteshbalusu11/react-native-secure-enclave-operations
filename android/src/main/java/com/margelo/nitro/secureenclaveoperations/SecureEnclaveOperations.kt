@@ -15,12 +15,18 @@ import java.security.PrivateKey
 import java.security.Signature
 import java.util.UUID
 import org.json.JSONObject
+import android.content.pm.PackageManager
+import com.google.android.play.core.integrity.IntegrityManagerFactory
+import com.google.android.play.core.integrity.StandardIntegrityManager
+
 
 @DoNotStrip
 @Keep
 class SecureEnclaveOperations(private val reactContext: ReactApplicationContext) :
   HybridSecureEnclaveOperationsSpec() {
   private val logTag = "SecureEnclaveOps"
+  private var integrityTokenProvider: StandardIntegrityManager.StandardIntegrityTokenProvider? =
+    null
 
   // Initialize Nitro native code loader
   init {
@@ -28,7 +34,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     secureenclaveoperationsOnLoad.initializeNative()
   }
 
-  override fun isAttestationSupported(): Promise<Boolean> {
+  override fun isHardwareBackedKeyGenerationSupported(): Promise<Boolean> {
     return Promise.async {
       try {
         Log.d(logTag, "Checking if attestation is supported")
@@ -51,7 +57,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     }
   }
 
-  @RequiresApi(Build.VERSION_CODES.P)
   override fun generateKey(): Promise<String> {
     return Promise.async {
       try {
@@ -75,15 +80,27 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
           )
             .setDigests(android.security.keystore.KeyProperties.DIGEST_SHA256)
             // Make biometric authentication required.
-            // Make strongbox hardware backing required
-            .setUserAuthenticationRequired(true)
             .setInvalidatedByBiometricEnrollment(true)
-            .setIsStrongBoxBacked(true)
-            .build()
+
+        val securityLevel = getSecurityLevel()
+        val isBiometricSupported = isBiometricEnabled()
+        val isBiometricEnrolled = isBiometricEnrolled()
+
+        if (isBiometricSupported && isBiometricEnrolled) {
+          parameterSpec.setUserAuthenticationRequired(true)
+        } else
+
+          if (securityLevel == PackageManager.FEATURE_STRONGBOX_KEYSTORE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            parameterSpec.setIsStrongBoxBacked(true)
+            Log.d(logTag, "KeyGenParameterSpec backed by hardware strongbox")
+          }
+
+        val buildSpec = parameterSpec.build()
+
         Log.d(logTag, "KeyGenParameterSpec built")
 
         // Generate the key pair with EC algorithm
-        keyPairGenerator.initialize(parameterSpec)
+        keyPairGenerator.initialize(buildSpec)
         keyPairGenerator.generateKeyPair()
         Log.d(logTag, "Key pair generated")
 
@@ -127,8 +144,11 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
           }
 
         // Check if the key is hardware-backed
-        val isHwBacked = isHardwareBacked(keyId)
-        Log.d(logTag, "Key is hardware backed: $isHwBacked")
+        val isBioMetricEnabled = isBiometricEnabled()
+        val isBioMetricEnrolled = isBiometricEnrolled()
+        Log.d(logTag, "isBioMetricEnabled: $isBioMetricEnabled")
+        Log.d(logTag, "isBioMetricEnrolled: $isBioMetricEnrolled")
+
 
         // Get security level
         val secLevel = getSecurityLevel()
@@ -142,7 +162,8 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
             "deviceModel" to Build.MODEL,
             "challenge" to challenge,
             "certificate" to certEncoded,
-            "hardwareBackedKey" to isHwBacked,
+            "biometricEnabled" to isBioMetricEnabled,
+            "biometricEnrolled" to isBioMetricEnrolled,
             "securityLevel" to secLevel
           )
         Log.d(logTag, "Created attestation data with ${attestationData.size} fields")
@@ -241,6 +262,56 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     }
   }
 
+  override fun prepareIntegrityTokenAndroid(cloudProjectNumber: String): Promise<Boolean> {
+    return Promise.async {
+      try {
+        Log.d(logTag, "Preparing integrity token with cloud project number: $cloudProjectNumber")
+
+        // Convert string to long
+        val cpn = cloudProjectNumber.toLong()
+
+        val context = NitroModules.applicationContext ?: reactContext
+
+        // Get the integrity manager
+        val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
+
+        // Build the preparation request
+        val prepareRequest = StandardIntegrityManager.PrepareIntegrityTokenRequest.builder()
+          .setCloudProjectNumber(cpn)
+          .build()
+
+        // Prepare the token provider
+        var isComplete = false
+        var result = false
+
+        standardIntegrityManager.prepareIntegrityToken(prepareRequest)
+          .addOnSuccessListener { provider ->
+            integrityTokenProvider = provider
+            Log.d(logTag, "Integrity token provider prepared successfully")
+            result = true
+            isComplete = true
+          }
+          .addOnFailureListener { ex ->
+            Log.e(logTag, "Failed to prepare integrity token", ex)
+            throw RuntimeException("Failed to prepare integrity token: ${ex.message}", ex)
+          }
+
+        // Wait for completion
+        while (!isComplete) {
+          Thread.sleep(100)
+        }
+
+        return@async result
+      } catch (e: NumberFormatException) {
+        Log.e(logTag, "Invalid cloud project number format", e)
+        throw RuntimeException("Invalid cloud project number format", e)
+      } catch (e: Exception) {
+        Log.e(logTag, "Error preparing integrity token", e)
+        throw RuntimeException("Error preparing integrity token: ${e.message}", e)
+      }
+    }
+  }
+
   // Helper method to check if a key is hardware-backed
   private fun isHardwareBacked(keyId: String): Boolean {
     try {
@@ -260,6 +331,74 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     return false
   }
 
+  // Check weather the device has biometric enabled
+  private fun isBiometricEnabled(): Boolean {
+    return try {
+      Log.d(logTag, "Checking if biometrics are enabled")
+      // Get application context from NitroModules
+      val context = NitroModules.applicationContext ?: reactContext
+
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val packageManager = context.packageManager
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_FACE) ||
+          packageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)
+        ) {
+          Log.d(logTag, "Face or iris recognition hardware is available")
+          return true
+        }
+      }
+
+      val packageManager = context.packageManager
+      if (packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+        Log.d(logTag, "Fingerprint hardware is available")
+        return true
+      }
+
+      Log.d(logTag, "No biometric hardware features detected")
+      false
+    } catch (e: Exception) {
+      Log.e(logTag, "Error checking biometric availability", e)
+      false
+    }
+  }
+
+  // Check if user has set up biometrics on the device
+  private fun isBiometricEnrolled(): Boolean {
+    return try {
+      Log.d(logTag, "Checking if biometrics are enrolled")
+      val context = NitroModules.applicationContext ?: reactContext
+
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // For Android Q (API 29) and above, use BiometricManager from android.hardware.biometrics
+        val biometricManager =
+          context.getSystemService(android.hardware.biometrics.BiometricManager::class.java)
+        val canAuthenticate =
+          biometricManager?.canAuthenticate(android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG)
+
+        if (canAuthenticate == android.hardware.biometrics.BiometricManager.BIOMETRIC_SUCCESS) {
+          Log.d(logTag, "Biometrics are enrolled and available")
+          return true
+        }
+        Log.d(logTag, "Biometric status code: $canAuthenticate")
+      } else {
+        // For Android M (API 23) to P (API 28), check keyguard secure
+        val keyguardManager =
+          context.getSystemService(android.content.Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
+        if (keyguardManager.isKeyguardSecure) {
+          // If keyguard is secure, biometric or pin/pattern is set up
+          Log.d(logTag, "Device is secured with PIN/pattern/biometric")
+          return true
+        }
+      }
+
+      Log.d(logTag, "No enrolled biometrics detected")
+      false
+    } catch (e: Exception) {
+      Log.e(logTag, "Error checking biometric enrollment", e)
+      false
+    }
+  }
+
   // Helper method to get the security level
   private fun getSecurityLevel(): String {
     return try {
@@ -267,12 +406,12 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
       // Get application context from NitroModules
       val context = NitroModules.applicationContext ?: reactContext
 
-      if (context.packageManager.hasSystemFeature("android.hardware.strongbox_keystore")) {
+      if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         Log.d(logTag, "StrongBox is available")
-        "StrongBox"
-      } else if (context.packageManager.hasSystemFeature("android.hardware.keystore")) {
+        PackageManager.FEATURE_STRONGBOX_KEYSTORE
+      } else if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_HARDWARE_KEYSTORE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         Log.d(logTag, "TEE is available")
-        "TEE"
+        PackageManager.FEATURE_HARDWARE_KEYSTORE
       } else {
         Log.d(logTag, "No hardware security features detected")
         "Software"

@@ -4,9 +4,25 @@ import Foundation
 import NitroModules
 
 class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
+  
+  // This function is not supported on iOS.
+  func prepareIntegrityTokenAndroid(cloudProjectNumber: String) throws -> NitroModules.Promise<Bool> {
+    return Promise.async {
+      // Create a specific error for unsupported platform functionality
+      let platformError = NSError(
+        domain: "SecureEnclaveOperations",
+        code: -100,
+        userInfo: [NSLocalizedDescriptionKey: "Google Play Integrity API is not supported on iOS"]
+      )
+      
+      // Throw the error directly in the async block
+      throw platformError
+    }
+  }
+  
   private let service = DCAppAttestService.shared
 
-  public func isAttestationSupported() throws -> Promise<Bool> {
+  public func isHardwareBackedKeyGenerationSupported() throws -> Promise<Bool> {
     return Promise.async {
       return self.service.isSupported
     }

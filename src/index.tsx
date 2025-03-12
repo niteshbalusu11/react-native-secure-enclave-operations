@@ -7,12 +7,25 @@ const SecureEnclaveOperationsHybridObject =
   );
 
 /**
- * Check if App Attestation is supported on this device
+ * Check if Hardware backed key generation is supported on this device
  *
- * @returns Promise<boolean> - True if the device supports App Attestation
+ * @returns Promise<boolean> - True if the device supports hardware-backed key generation
  */
-export function isAttestationSupported(): Promise<boolean> {
-  return SecureEnclaveOperationsHybridObject.isAttestationSupported();
+export function isHardwareBackedKeyGenerationSupported(): Promise<boolean> {
+  return SecureEnclaveOperationsHybridObject.isHardwareBackedKeyGenerationSupported();
+}
+
+/**
+ * ANDROID ONLY! Prepare an integrity token
+ *
+ * @returns Promise<boolean> - True if the integrity token was successfully prepared
+ */
+export function prepareIntegrityTokenAndroid(
+  cloudProjectNumber: string
+): Promise<boolean> {
+  return SecureEnclaveOperationsHybridObject.prepareIntegrityTokenAndroid(
+    cloudProjectNumber
+  );
 }
 
 /**
