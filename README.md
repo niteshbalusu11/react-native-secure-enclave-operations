@@ -2,12 +2,13 @@
 
 Perform cryptographic operations using Apple's Secure Enclave and App Attestation with React Native.
 
-<b>Important Note: App attestation service does not work on emulators, you will need to connect a real device.</b>
+<b>Important Note: App attestation service in iOS and Hardware-backed key generation in Android does not work on emulators, you will need to connect a real device.</b>
 
 ## Features
 
 - Hardware-backed key generation using Secure Enclave
 - App Attestation with Apple's DeviceCheck framework
+- Play Store Attestation with Google's Play Integrity API
 - Secure asymmetric signing operations
 - Verify app integrity for secure server communication
 
@@ -64,10 +65,7 @@ function attestKeyIos(keyId: string, challenge: string): Promise<string>;
  * @param data - Data to sign (usually your request payload)
  * @returns Promise<string> - Base64-encoded assertion object to send to your server
  */
-function generateAssertionIos(
-  keyId: string,
-  data: string
-): Promise<string>;
+function generateAssertionIos(keyId: string, data: string): Promise<string>;
 ```
 
 
