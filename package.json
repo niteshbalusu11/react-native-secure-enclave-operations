@@ -1,6 +1,6 @@
 {
   "name": "react-native-secure-enclave-operations",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Perform cryptographic operations inside secure hardware for Android and iOS.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
