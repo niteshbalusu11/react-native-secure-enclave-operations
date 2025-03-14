@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch index.ts"
+    "dev": "deno run --env-file --watch -A index.ts"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",

@@ -16,5 +16,7 @@
     "editor.defaultFormatter": "swiftlang.swift-vscode"
   },
   "lldb.library": "/Applications/Xcode-16.2.0.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/LLDB",
-  "lldb.launch.expressions": "native"
+  "lldb.launch.expressions": "native",
+  "deno.enable": true,
+  "cmake.sourceDirectory": "/Users/niteshchowdharybalusu/Documents/react-native-secure-enclave-operations/android"
 }

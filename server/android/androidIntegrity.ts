@@ -1,9 +1,9 @@
 import { google } from 'googleapis';
-import { X509Certificate } from 'crypto';
+import { X509Certificate } from 'node:crypto';
 import * as asn1js from 'asn1js';
 import * as pkijs from 'pkijs';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
+import * as fs from 'node:fs';
+import * as crypto from 'node:crypto';
 
 /**
  * Simplified type definition for the Certificate Revocation List (CRL) object.

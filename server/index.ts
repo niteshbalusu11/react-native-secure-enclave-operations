@@ -6,12 +6,13 @@ import bodyParser from 'body-parser';
 
 import androidRouter from './android/androidRouter.ts';
 import verifyAssertion from './verifyAssertion.ts';
+const decoder = new TextDecoder('utf-8');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const port = Bun.env.PORT || 3000;
+const port = Deno.env.get('PORT') || 3000;
 let nonce = uuid();
 
 // Please note that this is a simple example and the attestation should be stored in a secure way.
@@ -20,12 +21,14 @@ let nonce = uuid();
 let attestation: any = null;
 
 // The bundle identifier and team identifier are used to verify the attestation and assertion.
-const BUNDLE_IDENTIFIER = Bun.env.BUNDLE_IDENTIFIER || '';
-const TEAM_IDENTIFIER = Bun.env.TEAM_IDENTIFIER || '';
-export const GOOGLE_APPLICATION_CREDENTIALS =
-  Bun.env.GOOGLE_APPLICATION_CREDENTIALS || '';
+const BUNDLE_IDENTIFIER = Deno.env.get('BUNDLE_IDENTIFIER') || '';
+const TEAM_IDENTIFIER = Deno.env.get('TEAM_IDENTIFIER') || '';
+export const GOOGLE_APPLICATION_CREDENTIALS = decoder.decode(
+  Deno.readFileSync('keys.json')
+);
+
 export const ANDROID_BUNDLE_IDENTIFIER =
-  Bun.env.ANDROID_BUNDLE_IDENTIFIER || '';
+  Deno.env.get('ANDROID_BUNDLE_IDENTIFIER') || '';
 
 /**
  * Router for the android specific endpoints.

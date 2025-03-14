@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 const serverUrl =
-  Platform.OS === 'android' ? '10.0.2.2:3000' : '192.168.1.161:3000';
+  Platform.OS === 'android' ? '192.168.4.255:3000' : '192.168.1.161:3000';
 
 export const getChallenge = async () => {
   try {
@@ -98,5 +98,36 @@ export const verifyAssertion = async ({
   } catch (err) {
     console.error('error sending authenticated message', err);
     return false;
+  }
+};
+
+export const verifyAndroidAttestation = async ({
+  androidAttestation,
+}: {
+  androidAttestation: string;
+}) => {
+  try {
+    const response = await fetch(
+      `http://${serverUrl}/android/verifyIntegrityToken`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ androidAttestation }),
+      }
+    );
+
+    console.log(
+      'verify attestation fetch response',
+      response.status,
+      response.statusText
+    );
+
+    const data = await response.json();
+
+    console.log('android attestation from server', data);
+  } catch (err) {
+    console.error('error verifying attestation', err);
   }
 };

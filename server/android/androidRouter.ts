@@ -1,6 +1,10 @@
 import express, { Router } from 'express';
-import { verifyAttestation, verifyIntegrityToken } from './androidIntegrity';
-import { ANDROID_BUNDLE_IDENTIFIER, GOOGLE_APPLICATION_CREDENTIALS } from '..';
+import { verifyAttestation, verifyIntegrityToken } from './androidIntegrity.ts';
+import {
+  ANDROID_BUNDLE_IDENTIFIER,
+  GOOGLE_APPLICATION_CREDENTIALS,
+} from '../index.ts';
+import { Buffer } from 'node:buffer';
 
 const router: Router = express.Router();
 
@@ -24,7 +28,12 @@ router.post('/verifyIntegrityToken', async (req, res) => {
   }
   try {
     const googleCredentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS);
-    const { integrityToken } = req.body;
+    const { androidAttestation } = req.body;
+
+    const { integrityToken } = JSON.parse(
+      Buffer.from(androidAttestation, 'base64').toString('utf-8')
+    );
+
     if (integrityToken === undefined) {
       res.status(400).send({ error: 'Invalid integrity token' });
       return;
@@ -35,6 +44,9 @@ router.post('/verifyIntegrityToken', async (req, res) => {
       ANDROID_BUNDLE_IDENTIFIER,
       integrityToken
     );
+
+    console.log(data);
+
     res.send(data);
   } catch (error) {
     console.error(error);

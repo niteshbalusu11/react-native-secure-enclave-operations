@@ -126,9 +126,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
         Log.d(logTag, "Attesting key: $keyId with challenge: $challenge")
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 
-        // For now, create a simplified attestation
-        // In production, you'd integrate with Google Play Integrity API
-
         // Get the certificate for this key
         val cert = keyStore.getCertificate(keyId)
         Log.d(logTag, "Retrieved certificate: ${cert != null}")
@@ -149,23 +146,21 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
         Log.d(logTag, "isBioMetricEnabled: $isBioMetricEnabled")
         Log.d(logTag, "isBioMetricEnrolled: $isBioMetricEnrolled")
 
-
         // Get security level
         val secLevel = getSecurityLevel()
         Log.d(logTag, "Security level: $secLevel")
 
         // Create attestation data with device info and certificate
-        val attestationData =
-          mapOf(
-            "keyId" to keyId,
-            "platform" to "android",
-            "deviceModel" to Build.MODEL,
-            "challenge" to challenge,
-            "certificate" to certEncoded,
-            "biometricEnabled" to isBioMetricEnabled,
-            "biometricEnrolled" to isBioMetricEnrolled,
-            "securityLevel" to secLevel
-          )
+        val attestationData = mapOf(
+          "keyId" to keyId,
+          "platform" to "android",
+          "deviceModel" to Build.MODEL,
+          "challenge" to challenge,
+          "certificate" to certEncoded,
+          "biometricEnabled" to isBioMetricEnabled,
+          "biometricEnrolled" to isBioMetricEnrolled,
+          "securityLevel" to secLevel
+        )
         Log.d(logTag, "Created attestation data with ${attestationData.size} fields")
 
         // Convert to JSON and encode as Base64
@@ -174,10 +169,86 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
           Base64.encodeToString(jsonAttestation.toByteArray(), Base64.NO_WRAP)
         Log.d(logTag, "Attestation encoded, length: ${base64Attestation.length}")
 
+        // Hash the attestation to create a shorter request hash (required to be < 500 bytes)
+        val messageDigest = java.security.MessageDigest.getInstance("SHA-256")
+        val attestationHash = messageDigest.digest(base64Attestation.toByteArray())
+        val requestHash = Base64.encodeToString(attestationHash, Base64.NO_WRAP)
+        Log.d(logTag, "Created attestation hash for integrity token, length: ${requestHash.length}")
+
+        // Request integrity token using the hashed attestation
+        Log.d(logTag, "Requesting integrity token with attestation hash")
+        val integrityToken = requestIntegrityToken(requestHash).await()
+        Log.d(
+          logTag,
+          "Integrity token ${if (integrityToken != null) "received" else "not received"}"
+        )
+
+        // If we got an integrity token, add it to our attestation and re-encode
+        if (integrityToken != null) {
+          val attestationWithToken = attestationData + mapOf("integrityToken" to integrityToken)
+          val jsonAttestationWithToken = JSONObject(attestationWithToken).toString()
+          val base64AttestationWithToken =
+            Base64.encodeToString(jsonAttestationWithToken.toByteArray(), Base64.NO_WRAP)
+          Log.d(
+            logTag,
+            "Final attestation with token encoded, length: ${base64AttestationWithToken.length}"
+          )
+          return@async base64AttestationWithToken
+        }
+
         return@async base64Attestation
       } catch (e: Exception) {
         Log.e(logTag, "Error attesting key", e)
         throw RuntimeException("Error attesting key: ${e.message}", e)
+      }
+    }
+  }
+
+  private fun requestIntegrityToken(requestHash: String): Promise<String?> {
+    return Promise.async {
+      try {
+        if (integrityTokenProvider == null) {
+          Log.e(logTag, "Integrity token provider not initialized")
+          throw RuntimeException("Integrity token provider not initialized")
+        }
+
+        Log.d(logTag, "Requesting integrity token with hash: $requestHash")
+
+        val request = StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
+          .setRequestHash(requestHash)
+          .build()
+
+        var isComplete = false
+        var token: String? = null
+
+        integrityTokenProvider?.request(request)
+          ?.addOnSuccessListener { response ->
+            Log.d(logTag, "Integrity token received successfully")
+            token = response.token()
+            isComplete = true
+          }
+          ?.addOnFailureListener { ex ->
+            Log.e(logTag, "Failed to get integrity token", ex)
+            throw RuntimeException("Failed to get integrity token: ${ex.message}", ex)
+          }
+
+        // Wait for completion with timeout
+        var attempts = 0
+        val maxAttempts = 50 // 5 seconds timeout
+        while (!isComplete && attempts < maxAttempts) {
+          Thread.sleep(100)
+          attempts++
+        }
+
+        if (!isComplete) {
+          Log.e(logTag, "Timeout while waiting for integrity token")
+          throw RuntimeException("Timeout while waiting for integrity token")
+        }
+
+        return@async token
+      } catch (e: Exception) {
+        Log.e(logTag, "Error requesting integrity token", e)
+        throw RuntimeException("Error requesting integrity token: ${e.message}", e)
       }
     }
   }

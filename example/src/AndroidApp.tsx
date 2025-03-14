@@ -7,7 +7,13 @@ import {
   generateAssertion,
   prepareIntegrityTokenAndroid,
 } from 'react-native-secure-enclave-operations';
-import { getChallenge, verifyAssertion, verifyAttestation } from './fetch';
+import {
+  getChallenge,
+  verifyAndroidAttestation,
+  verifyAssertion,
+  verifyAttestation,
+} from './fetch';
+import React from 'react';
 const cloudProjectNumber = '25649124009';
 
 export default function AndroidApp() {
@@ -48,11 +54,9 @@ export default function AndroidApp() {
       const androidAttestation = await attestKey(generatedKey, challenge);
       console.log('android attestation is ', androidAttestation);
 
-      // await verifyAttestation({
-      //   attestation: androidAttestation,
-      //   challenge,
-      //   keyId: generatedKey,
-      // });
+      await verifyAndroidAttestation({
+        androidAttestation: androidAttestation,
+      });
     } catch (err) {
       console.error('error attesting with android', err);
     }
