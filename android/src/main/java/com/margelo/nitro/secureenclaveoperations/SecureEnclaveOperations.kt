@@ -32,7 +32,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
 
   // Initialize Nitro native code loader
   init {
-    Log.d(logTag, "Initializing SecureEnclaveOperations")
     secureenclaveoperationsOnLoad.initializeNative()
   }
 
@@ -54,8 +53,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   override fun prepareIntegrityTokenAndroid(cloudProjectNumber: String): Promise<Boolean> {
     return Promise.async {
       try {
-        Log.d(logTag, "Preparing integrity token with cloud project number: $cloudProjectNumber")
-
         // Convert string to long
         val cpn = cloudProjectNumber.toLong()
 
@@ -76,12 +73,10 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
         standardIntegrityManager.prepareIntegrityToken(prepareRequest)
           .addOnSuccessListener { provider ->
             integrityTokenProvider = provider
-            Log.d(logTag, "Integrity token provider prepared successfully")
             result = true
             isComplete = true
           }
           .addOnFailureListener { ex ->
-            Log.e(logTag, "Failed to prepare integrity token", ex)
             throw RuntimeException("Failed to prepare integrity token: ${ex.message}", ex)
           }
 
@@ -92,10 +87,8 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
 
         return@async result
       } catch (e: NumberFormatException) {
-        Log.e(logTag, "Invalid cloud project number format", e)
         throw RuntimeException("Invalid cloud project number format", e)
       } catch (e: Exception) {
-        Log.e(logTag, "Error preparing integrity token", e)
         throw RuntimeException("Error preparing integrity token: ${e.message}", e)
       }
     }
@@ -105,11 +98,8 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     return Promise.async {
       try {
         if (integrityTokenProvider == null) {
-          Log.e(logTag, "Integrity token provider not initialized")
           throw RuntimeException("Integrity token provider not initialized")
         }
-
-        Log.d(logTag, "Requesting integrity token with hash: $requestHash")
 
         val request = StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
           .setRequestHash(requestHash)
@@ -120,12 +110,10 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
 
         integrityTokenProvider?.request(request)
           ?.addOnSuccessListener { response ->
-            Log.d(logTag, "Integrity token received successfully")
             token = response.token()
             isComplete = true
           }
           ?.addOnFailureListener { ex ->
-            Log.e(logTag, "Failed to get integrity token", ex)
             throw RuntimeException("Failed to get integrity token: ${ex.message}", ex)
           }
 
@@ -137,13 +125,11 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
           attempts++
         }
         if (!isComplete) {
-          Log.e(logTag, "Timeout while waiting for integrity token")
           throw RuntimeException("Timeout while waiting for integrity token")
         }
 
         return@async token
       } catch (e: Exception) {
-        Log.e(logTag, "Error requesting integrity token", e)
         throw RuntimeException("Error requesting integrity token: ${e.message}", e)
       }
     }
@@ -198,7 +184,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
         val concatenatedAttestations = attestations.joinToString("|")
         return@async Base64.encodeToString(concatenatedAttestations.toByteArray(), Base64.NO_WRAP)
       } catch (e: Exception) {
-        Log.e(logTag, "Error attesting key", e)
         throw RuntimeException("Error attesting key: ${e.message}", e)
       }
     }
@@ -227,13 +212,11 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     return Promise.async {
       try {
         // Generate a unique key ID
-        Log.d(logTag, "Generating key with ID: $keyId")
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 
 
         // Create a key pair generator for EC keys
         val keyPairGenerator = KeyPairGenerator.getInstance("EC", "AndroidKeyStore")
-        Log.d(logTag, "Created key pair generator for EC/AndroidKeyStore")
 
         // Configure the key pair generator with hardware-backed security
         val parameterSpec =
@@ -257,29 +240,22 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
 
           if (securityLevel == PackageManager.FEATURE_STRONGBOX_KEYSTORE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             parameterSpec.setIsStrongBoxBacked(true)
-            Log.d(logTag, "KeyGenParameterSpec backed by hardware strongbox")
           }
 
         val buildSpec = parameterSpec.build()
 
-        Log.d(logTag, "KeyGenParameterSpec built")
-
         // Generate the key pair with EC algorithm
         keyPairGenerator.initialize(buildSpec)
         keyPairGenerator.generateKeyPair()
-        Log.d(logTag, "Key pair generated")
 
         val entry = keyStore.getEntry(keyId, null) as? KeyStore.PrivateKeyEntry
         if (entry == null) {
-          Log.e(logTag, "Failed to retrieve key entry from KeyStore")
           throw RuntimeException("Failed to generate key")
         }
-        Log.d(logTag, "Key successfully verified in KeyStore")
 
         // Return the key ID to be used for future operations
         return@async keyId
       } catch (e: Exception) {
-        Log.e(logTag, "Error generating key", e)
         throw RuntimeException("Error generating key: ${e.message}", e)
       }
     }
@@ -288,8 +264,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   private fun isHardwareBackedKeyGenerationSupported(): Promise<Boolean> {
     return Promise.async {
       try {
-        Log.d(logTag, "Checking if attestation is supported")
-
         // Get application context from NitroModules
         val context = NitroModules.applicationContext ?: reactContext
 
@@ -297,12 +271,10 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
           context.packageManager.hasSystemFeature(
             "android.hardware.strongbox_keystore"
           )
-        Log.d(logTag, "StrongBox support: $isStrongBoxSupported")
 
         // We'll just check hardware features for now, without requiring Play Services
         return@async isStrongBoxSupported
       } catch (e: Exception) {
-        Log.e(logTag, "Error checking attestation support", e)
         return@async false
       }
     }
@@ -311,17 +283,14 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   // Helper method to check if a key is hardware-backed
   private fun isHardwareBacked(keyId: String): Boolean {
     try {
-      Log.d(logTag, "Checking if key is hardware-backed: $keyId")
       val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
       val entry = keyStore.getEntry(keyId, null) as? KeyStore.PrivateKeyEntry
       if (entry != null) {
         val privateKey = entry.privateKey
         val isHardwareBacked = privateKey.toString().contains("AndroidKeyStore")
-        Log.d(logTag, "Key hardware backing check result: $isHardwareBacked")
         return isHardwareBacked
       }
     } catch (e: Exception) {
-      Log.e(logTag, "Error checking if key is hardware-backed", e)
     }
     Log.w(logTag, "Could not determine if key is hardware-backed, assuming false")
     return false
@@ -330,7 +299,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   // Check weather the device has biometric enabled
   private fun isBiometricEnabled(): Boolean {
     return try {
-      Log.d(logTag, "Checking if biometrics are enabled")
       // Get application context from NitroModules
       val context = NitroModules.applicationContext ?: reactContext
 
@@ -339,21 +307,17 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_FACE) ||
           packageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)
         ) {
-          Log.d(logTag, "Face or iris recognition hardware is available")
           return true
         }
       }
 
       val packageManager = context.packageManager
       if (packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-        Log.d(logTag, "Fingerprint hardware is available")
         return true
       }
 
-      Log.d(logTag, "No biometric hardware features detected")
       false
     } catch (e: Exception) {
-      Log.e(logTag, "Error checking biometric availability", e)
       false
     }
   }
@@ -361,7 +325,6 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   // Check if user has set up biometrics on the device
   private fun isBiometricEnrolled(): Boolean {
     return try {
-      Log.d(logTag, "Checking if biometrics are enrolled")
       val context = NitroModules.applicationContext ?: reactContext
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -372,25 +335,20 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
           biometricManager?.canAuthenticate(android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG)
 
         if (canAuthenticate == android.hardware.biometrics.BiometricManager.BIOMETRIC_SUCCESS) {
-          Log.d(logTag, "Biometrics are enrolled and available")
           return true
         }
-        Log.d(logTag, "Biometric status code: $canAuthenticate")
       } else {
         // For Android M (API 23) to P (API 28), check keyguard secure
         val keyguardManager =
           context.getSystemService(android.content.Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
         if (keyguardManager.isKeyguardSecure) {
           // If keyguard is secure, biometric or pin/pattern is set up
-          Log.d(logTag, "Device is secured with PIN/pattern/biometric")
           return true
         }
       }
 
-      Log.d(logTag, "No enrolled biometrics detected")
       false
     } catch (e: Exception) {
-      Log.e(logTag, "Error checking biometric enrollment", e)
       false
     }
   }
@@ -398,22 +356,17 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   // Helper method to get the security level
   private fun getSecurityLevel(): String {
     return try {
-      Log.d(logTag, "Getting security level")
       // Get application context from NitroModules
       val context = NitroModules.applicationContext ?: reactContext
 
       if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        Log.d(logTag, "StrongBox is available")
         PackageManager.FEATURE_STRONGBOX_KEYSTORE
       } else if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_HARDWARE_KEYSTORE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        Log.d(logTag, "TEE is available")
         PackageManager.FEATURE_HARDWARE_KEYSTORE
       } else {
-        Log.d(logTag, "No hardware security features detected")
         "Software"
       }
     } catch (e: Exception) {
-      Log.e(logTag, "Error determining security level", e)
       "Unknown"
     }
   }

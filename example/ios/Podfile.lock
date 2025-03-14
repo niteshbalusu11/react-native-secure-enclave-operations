@@ -1548,7 +1548,7 @@ PODS:
     - React-logger (= 0.78.0)
     - React-perflogger (= 0.78.0)
     - React-utils (= 0.78.0)
-  - SecureEnclaveOperations (0.1.0):
+  - SecureEnclaveOperations (0.0.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1855,7 +1855,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f2e81d80afd71a8058589e19d8a134243fa53f17
   ReactCodegen: a63a0ab6ae824aef2e8c744981edd718b16eb9f2
   ReactCommon: 3d39389f8e2a2157d5c999f8fba57bd1c8f226f0
-  SecureEnclaveOperations: f8e29cc329af5847c42ad2a84afe444d5a2a9cb2
+  SecureEnclaveOperations: f77a72c13ba5aacab088861f3d6fb7c7a633bf51
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: afd04ff05ebe0121a00c468a8a3c8080221cb14c
 
