@@ -1,4 +1,5 @@
 import { createHash, createVerify } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 import cbor from 'cbor';
 
 export type VerifyAssertionParams = {

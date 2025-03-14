@@ -162,6 +162,7 @@
             yarn
             androidSdk
             jdk17
+            bun
           ];
 
           # macOS-specific packages

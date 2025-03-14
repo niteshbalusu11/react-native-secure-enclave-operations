@@ -1,18 +1,18 @@
 import express from 'express';
 import { v4 as uuid } from 'uuid';
+import { Buffer } from 'node:buffer';
 
 import verifyAttestation from './verifyAttestation.ts';
 import bodyParser from 'body-parser';
 
 import androidRouter from './android/androidRouter.ts';
 import verifyAssertion from './verifyAssertion.ts';
-const decoder = new TextDecoder('utf-8');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const port = Deno.env.get('PORT') || 3000;
+const port = Bun.env.PORT || 3000;
 let nonce = uuid();
 
 // Please note that this is a simple example and the attestation should be stored in a secure way.
@@ -21,14 +21,13 @@ let nonce = uuid();
 let attestation: any = null;
 
 // The bundle identifier and team identifier are used to verify the attestation and assertion.
-const BUNDLE_IDENTIFIER = Deno.env.get('BUNDLE_IDENTIFIER') || '';
-const TEAM_IDENTIFIER = Deno.env.get('TEAM_IDENTIFIER') || '';
-export const GOOGLE_APPLICATION_CREDENTIALS = decoder.decode(
-  Deno.readFileSync('keys.json')
-);
+const BUNDLE_IDENTIFIER = Bun.env.BUNDLE_IDENTIFIER || '';
+const TEAM_IDENTIFIER = Bun.env.TEAM_IDENTIFIER || '';
+export const GOOGLE_APPLICATION_CREDENTIALS =
+  await Bun.file('keys.json').text();
 
 export const ANDROID_BUNDLE_IDENTIFIER =
-  Deno.env.get('ANDROID_BUNDLE_IDENTIFIER') || '';
+  Bun.env.ANDROID_BUNDLE_IDENTIFIER || '';
 
 /**
  * Router for the android specific endpoints.

@@ -1,40 +1,27 @@
-import { useState } from 'react';
 import { View, StyleSheet, Button } from 'react-native';
 import {
-  isHardwareBackedKeyGenerationSupported,
-  generateKey,
-  attestKey,
-  generateAssertion,
+  isPlayServicesAvailableAndroid,
+  getAttestationAndroid,
+  requestIntegrityTokenAndroid,
   prepareIntegrityTokenAndroid,
 } from 'react-native-secure-enclave-operations';
+import uuid from 'react-native-uuid';
+
 import {
   getChallenge,
+  verifyAndroidIntegrityToken,
   verifyAndroidAttestation,
-  verifyAssertion,
-  verifyAttestation,
 } from './fetch';
-import React from 'react';
 const cloudProjectNumber = '25649124009';
 
 export default function AndroidApp() {
-  const [generatedKey, setGeneratedKey] = useState('');
-
   const isAvailable = async () => {
     try {
-      const isSupported = await isHardwareBackedKeyGenerationSupported();
+      const isSupported = await isPlayServicesAvailableAndroid();
 
-      console.log('is available', isSupported);
+      console.log('is play services available', isSupported);
     } catch (err) {
-      console.error('is available error', err);
-    }
-  };
-  const generateKeyPair = async () => {
-    try {
-      const key = await generateKey();
-      console.log(key);
-      setGeneratedKey(key);
-    } catch (err) {
-      console.error('error generating key pair', err);
+      console.error('is play services available error', err);
     }
   };
 
@@ -47,41 +34,34 @@ export default function AndroidApp() {
     }
   };
 
-  const attestKeyWithAndroid = async () => {
+  const requestIntegrityFromAndroid = async () => {
     try {
       // Generate a unique challenge from server to attest key
       const challenge = await getChallenge();
-      const androidAttestation = await attestKey(generatedKey, challenge);
+
+      const androidAttestation = await requestIntegrityTokenAndroid(challenge);
+
       console.log('android attestation is ', androidAttestation);
 
-      await verifyAndroidAttestation({
-        androidAttestation: androidAttestation,
+      await verifyAndroidIntegrityToken({
+        integrityToken: androidAttestation,
       });
     } catch (err) {
       console.error('error attesting with android', err);
     }
   };
 
-  const genAssertion = async () => {
+  const getHardwareAttestation = async () => {
     try {
       // Generate another challenge for subsequent assertions
       const challenge = await getChallenge();
 
-      const message = 'some data to sign';
-
-      const assertion = await generateAssertion(
-        generatedKey,
-        challenge,
-        message
-      );
-      console.log('assertion result is ', assertion);
+      const attestation = await getAttestationAndroid(challenge, uuid.v4());
+      console.log('assertion result is ', attestation);
 
       // Verify assertion
-      await verifyAssertion({
-        assertion,
-        challenge,
-        keyId: generatedKey,
-        message,
+      await verifyAndroidAttestation({
+        attestation,
       });
     } catch (err) {
       console.error('error generating assertion', err);
@@ -89,12 +69,14 @@ export default function AndroidApp() {
   };
   return (
     <View style={styles.container}>
-      <Button onPress={isAvailable} title="Is secure hardware available" />
-      <Button onPress={generateKeyPair} title="Generate key pair" />
+      <Button onPress={isAvailable} title="Is play services available" />
       <Button onPress={prepareIntegrityToken} title="Prepare integrity token" />
-      <Button onPress={attestKeyWithAndroid} title="Attest with Android" />
+      <Button
+        onPress={requestIntegrityFromAndroid}
+        title="Request integrity from Android"
+      />
 
-      <Button onPress={genAssertion} title="Generate assertion" />
+      <Button onPress={getHardwareAttestation} title="getHardwareAttestation" />
     </View>
   );
 }

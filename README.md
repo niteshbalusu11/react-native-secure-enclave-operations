@@ -31,24 +31,24 @@ npm install react-native-secure-enclave-operations react-native-nitro-modules
 | -------- | --------------------- |
 | iOS      | ✅                    |
 | macOS    | ✅                    |
-| Android  | ❌ (Work in progress) |
+| Android  | ✅                    |
 
 ## API Reference
 
-### App Attestation
+### App Attestation (iOS)
 
 ```typescript
 /**
  * Check if App Attestation is supported on this device
  * @returns Promise<boolean> - True if the device supports App Attestation
  */
-function isAttestationSupported(): Promise<boolean>;
+function isAttestationSupportedIos(): Promise<boolean>;
 
 /**
  * Generate a new key pair in the Secure Enclave for App Attestation
  * @returns Promise<string> - Key identifier for the generated key
  */
-function generateKey(): Promise<string>;
+function generateKeyIos(): Promise<string>;
 
 /**
  * Attest a key with Apple's servers
@@ -56,7 +56,7 @@ function generateKey(): Promise<string>;
  * @param challenge - Challenge from your server (should be unique per attestation)
  * @returns Promise<string> - Base64-encoded attestation object to send to your server
  */
-function attestKey(keyId: string, challenge: string): Promise<string>;
+function attestKeyIos(keyId: string, challenge: string): Promise<string>;
 
 /**
  * Sign data with an attested key
@@ -64,64 +64,132 @@ function attestKey(keyId: string, challenge: string): Promise<string>;
  * @param data - Data to sign (usually your request payload)
  * @returns Promise<string> - Base64-encoded assertion object to send to your server
  */
-function generateAssertion(
+function generateAssertionIos(
   keyId: string,
   data: string
 ): Promise<string>;
 ```
 
+
+### Play Integrity (Android)
+
+```typescript
+/**
+ * Check if Google Play Services is available on the device
+ * @returns Promise<boolean> - True if Google Play Services is available
+ */
+function isPlayServicesAvailableAndroid(): Promise<boolean>;
+
+/**
+ * Prepare an integrity token for Google Play Integrity API
+ * @param cloudProjectNumber - Cloud project number from Google Cloud Console
+ * @returns Promise<boolean> - True if the integrity token was successfully prepared
+ */
+function prepareIntegrityTokenAndroid(cloudProjectNumber: string): Promise<boolean>;
+
+/**
+ * @param requestHash - Hash of the request data to be signed
+ * @returns Promise<string> - Base64-encoded integrity token to send to your server
+ */
+export function requestIntegrityTokenAndroid(requestHash: string): Promise<string>;
+
+/**
+ * @param challenge - Challenge from your server (should be unique per request)
+ * @param keyId - Key identifier from generateKey()
+ * @returns Promise<string> - Base64-encoded attestation object to send to your server
+ */
+export function getAttestationAndroid(challenge: string, keyId: string): Promise<string>
+```
+
+
 ## Usage
 
-### Basic Example
+### Basic Example iOS
 
 ```typescript
 import {
-  isAttestationSupported,
-  generateKey,
-  attestKey,
-  generateAssertion,
+  isHardwareBackedKeyGenerationSupportedIos,
+  generateKeyIos,
+  attestKeyIos,
+  generateAssertionIos,
 } from 'react-native-secure-enclave-operations';
 
-// Check if device supports App Attestation
-const isSupported = await isAttestationSupported();
+// Check if device supports hardware-backed key generation
+const isSupported = await isHardwareBackedKeyGenerationSupportedIos();
 if (!isSupported) {
-  console.warn('Device does not support App Attestation');
+  console.warn('Device does not support hardware-backed key generation');
   return;
 }
 
 // Generate a key pair
-const keyId = await generateKey();
+const keyId = await generateKeyIos();
 console.log('Generated key ID:', keyId);
 
+// Fetch a challenge from your server
+const challenge = await fetchChallengeFromServer();
+
 // Attest the key with Apple's servers
-const challengeFromServer = 'unique-challenge-from-your-server';
-const attestationObject = await attestKey(keyId, challengeFromServer);
+const attestationObject = await attestKeyIos(keyId, challenge);
 
 // Send attestationObject to your server for verification
-const verified = await sendAttestationToServer(
-  attestationObject,
-  challengeFromServer
-);
+await verifyAttestationWithServer(attestationObject, challenge, keyId);
 
-// Use the attested key to sign requests
-const requestData = JSON.stringify({ userId: 123, action: 'get_data' });
-const requestChallenge = 'another-unique-challenge-from-server';
-const assertionObject = await generateAssertion(
+// Get another unique challenge from your server
+const anotherChallenge = await fetchChallengeFromServer();
+
+// Use the key to sign data
+const message = 'data to sign';
+const data = {
+  data: message,
+  challenge: anotherChallenge,
+};
+const assertion = await generateAssertionIos(keyId, JSON.stringify(data));
+
+// Verify the assertion with your server
+await verifyAssertionWithServer({
+  assertion,
+  challenge,
   keyId,
-  requestChallenge,
-  requestData
-);
-
-// Include the assertion in your authenticated request
-const response = await fetch('https://api.yourserver.com/secure-endpoint', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-App-Attest-Assertion': assertionObject,
-    'X-App-Attest-Challenge': requestChallenge,
-  },
-  body: requestData,
+  message,
 });
+```
+
+### Basic Example Android
+```typescript
+import {
+  isPlayServicesAvailableAndroid,
+  prepareIntegrityTokenAndroid,
+  requestIntegrityTokenAndroid,
+  getAttestationAndroid,
+} from 'react-native-secure-enclave-operations';
+import uuid from 'react-native-uuid';
+
+// Check if Play Services is available
+const isAvailable = await isPlayServicesAvailableAndroid();
+if (!isAvailable) {
+  console.warn('Google Play Services is not available');
+  return;
+}
+
+// Prepare integrity token (should be called when app starts)
+const cloudProjectNumber = 'your-cloud-project-number';
+await prepareIntegrityTokenAndroid(cloudProjectNumber);
+
+// Fetch a challenge from your server
+const challenge = await fetchChallengeFromServer();
+
+// Request an integrity token
+const integrityToken = await requestIntegrityTokenAndroid(challenge);
+
+// Send the integrity token to your server for verification
+await verifyIntegrityTokenWithServer(integrityToken);
+
+// Generate a key attestation (hardware-backed)
+const keyId = uuid.v4();
+const attestation = await getAttestationAndroid(challenge, keyId);
+
+// Send the attestation to your server for verification
+await verifyAttestationWithServer(attestation);
 ```
 
 ### React Native Example:

@@ -28,11 +28,7 @@ router.post('/verifyIntegrityToken', async (req, res) => {
   }
   try {
     const googleCredentials = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS);
-    const { androidAttestation } = req.body;
-
-    const { integrityToken } = JSON.parse(
-      Buffer.from(androidAttestation, 'base64').toString('utf-8')
-    );
+    const { integrityToken } = req.body;
 
     if (integrityToken === undefined) {
       res.status(400).send({ error: 'Invalid integrity token' });

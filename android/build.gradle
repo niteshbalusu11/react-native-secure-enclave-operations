@@ -155,4 +155,5 @@ dependencies {
 
   // Note: For full implementation, uncomment the following:
    implementation "com.google.android.play:integrity:1.4.0"
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
 }

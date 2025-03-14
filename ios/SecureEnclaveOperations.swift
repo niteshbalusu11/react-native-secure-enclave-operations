@@ -4,7 +4,48 @@ import Foundation
 import NitroModules
 
 class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
+  func isPlayServicesAvailableAndroid() throws -> NitroModules.Promise<Bool> {
+    return Promise.async {
+      // Create a specific error for unsupported platform functionality
+      let platformError = NSError(
+        domain: "SecureEnclaveOperations",
+        code: -100,
+        userInfo: [NSLocalizedDescriptionKey: "Google Play Integrity API is not supported on iOS"]
+      )
 
+      // Throw the error directly in the async block
+      throw platformError
+    }
+  }
+  
+  func requestIntegrityTokenAndroid(requestHash: String) throws -> NitroModules.Promise<String> {
+    return Promise.async {
+      // Create a specific error for unsupported platform functionality
+      let platformError = NSError(
+        domain: "SecureEnclaveOperations",
+        code: -100,
+        userInfo: [NSLocalizedDescriptionKey: "Google Play Integrity API is not supported on iOS"]
+      )
+
+      // Throw the error directly in the async block
+      throw platformError
+    }
+  }
+  
+  func getAttestationAndroid(challenge: String, keyId: String) throws -> NitroModules.Promise<String> {
+    return Promise.async {
+      // Create a specific error for unsupported platform functionality
+      let platformError = NSError(
+        domain: "SecureEnclaveOperations",
+        code: -100,
+        userInfo: [NSLocalizedDescriptionKey: "Google Play Integrity API is not supported on iOS"]
+      )
+
+      // Throw the error directly in the async block
+      throw platformError
+    }
+  }
+  
   // This function is not supported on iOS.
   func prepareIntegrityTokenAndroid(cloudProjectNumber: String) throws -> NitroModules.Promise<Bool>
   {
@@ -23,13 +64,13 @@ class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
 
   private let service = DCAppAttestService.shared
 
-  public func isHardwareBackedKeyGenerationSupported() throws -> Promise<Bool> {
+  public func isHardwareBackedKeyGenerationSupportedIos() throws -> Promise<Bool> {
     return Promise.async {
       return self.service.isSupported
     }
   }
 
-  public func generateKey() throws -> Promise<String> {
+  public func generateKeyIos() throws -> Promise<String> {
     return Promise.async {
       return try await withCheckedThrowingContinuation { continuation in
         self.service.generateKey { keyId, error in
@@ -59,7 +100,7 @@ class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
     }
   }
 
-  public func attestKey(keyId: String, challenge: String) throws -> Promise<String> {
+  public func attestKeyIos(keyId: String, challenge: String) throws -> Promise<String> {
     return Promise.async {
       // Convert challenge to Data
       guard let challengeData = challenge.data(using: .utf8) else {
@@ -104,10 +145,10 @@ class SecureEnclaveOperations: HybridSecureEnclaveOperationsSpec {
     }
   }
 
-  public func generateAssertion(keyId: String, data: String) throws -> Promise<
+  public func generateAssertionIos(keyId: String, data: String) throws -> Promise<
     String
   > {
-    return Promise.async {      
+    return Promise.async {
       guard let encodedClientData = data.data(using: .utf8) else {
         throw NSError(
           domain: "SecureEnclaveOperations", code: -6,

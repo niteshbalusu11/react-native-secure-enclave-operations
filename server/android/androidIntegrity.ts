@@ -1,9 +1,9 @@
 import { google } from 'googleapis';
 import { X509Certificate } from 'node:crypto';
-import * as asn1js from 'asn1js';
-import * as pkijs from 'pkijs';
-import * as fs from 'node:fs';
-import * as crypto from 'node:crypto';
+import asn1js from 'asn1js';
+import pkijs from 'pkijs';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
 
 /**
  * Simplified type definition for the Certificate Revocation List (CRL) object.
@@ -70,9 +70,15 @@ export const verifyIntegrityToken = async (
 export const verifyAttestation = async (x509Array: string) => {
   // We split the chain of certificates and convert them to PEM format to be parsed by the X509Certificate class
   const decodedString = Buffer.from(x509Array, 'base64').toString('utf-8');
-  const certificates = decodedString.split(',');
+
+  console.log('decoded string', decodedString);
+
+  // Use the new delimiter
+  const certificates = decodedString.split('|');
   const x509Chain = certificates.map((cert) => {
-    return new X509Certificate(base64ToPem(cert));
+    // Format as proper PEM with newlines every 64 characters
+    const formatted = cert.replace(/(.{64})/g, '$1\n');
+    return new X509Certificate(base64ToPem(formatted));
   });
   validateIssuance(x509Chain);
   await validateRevokation(x509Chain);
@@ -167,6 +173,9 @@ const validateKeyAttestationExtension = (x509Chain: X509Certificate[]) => {
 
 const base64ToPem = (b64cert: string) => {
   return (
-    '-----BEGIN CERTIFICATE-----\n' + b64cert + '-----END CERTIFICATE-----'
+    '-----BEGIN CERTIFICATE-----\n' +
+    b64cert +
+    (b64cert.endsWith('\n') ? '' : '\n') +
+    '-----END CERTIFICATE-----'
   );
 };

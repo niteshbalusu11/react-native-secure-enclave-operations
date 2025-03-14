@@ -1,4 +1,4 @@
-import * as cbor from 'cbor';
+import cbor from 'cbor';
 import { createHash, X509Certificate } from 'node:crypto';
 import asn1js from 'asn1js';
 import pkijs from 'pkijs';

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { View, StyleSheet, Button } from 'react-native';
 import {
-  isHardwareBackedKeyGenerationSupported,
-  generateKey,
-  attestKey,
-  generateAssertion,
+  isHardwareBackedKeyGenerationSupportedIos,
+  generateKeyIos,
+  attestKeyIos,
+  generateAssertionIos,
 } from 'react-native-secure-enclave-operations';
 import { getChallenge, verifyAssertion, verifyAttestation } from './fetch';
 
@@ -13,7 +13,7 @@ export default function IosApp() {
 
   const isAvailable = async () => {
     try {
-      const isSupported = await isHardwareBackedKeyGenerationSupported();
+      const isSupported = await isHardwareBackedKeyGenerationSupportedIos();
 
       console.log('is available', isSupported);
     } catch (err) {
@@ -22,7 +22,7 @@ export default function IosApp() {
   };
   const generateKeyPair = async () => {
     try {
-      const key = await generateKey();
+      const key = await generateKeyIos();
       console.log(key);
       setGeneratedKey(key);
     } catch (err) {
@@ -34,7 +34,7 @@ export default function IosApp() {
     try {
       // Generate a unique challenge from server to attest key
       const challenge = await getChallenge();
-      const appleAttestation = await attestKey(generatedKey, challenge);
+      const appleAttestation = await attestKeyIos(generatedKey, challenge);
       console.log('apple attestation is ', appleAttestation);
 
       await verifyAttestation({
@@ -59,7 +59,7 @@ export default function IosApp() {
         challenge: challenge,
       };
 
-      const assertion = await generateAssertion(
+      const assertion = await generateAssertionIos(
         generatedKey,
         JSON.stringify(data)
       );
