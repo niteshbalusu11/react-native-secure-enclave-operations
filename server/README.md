@@ -32,7 +32,9 @@ ANDROID_BUNDLE_IDENTIFIER=your.android.app.packagename
 PORT=3000
 ```
 
-Additionally, you need to create a `keys.json` file with your Google Cloud service account credentials for the Google Play Integrity API.
+### Android Keys
+- Add a `keys.json` in the file at the root of the `server` directory with your Google Cloud service account credentials for the Google Play Integrity API.
+- Check the `keys_sample.json` file for a sample configuration.
 
 ## Running the Server
 
