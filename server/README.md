@@ -62,6 +62,7 @@ bun run index.ts
 
 ### Android Verification
 
+- `GET /attestation/nonce`: Get a challenge nonce
 - `POST /android/verifyIntegrityToken`: Verify a Google Play Integrity token
 - `POST /android/verifyAttestation`: Verify Android hardware key attestation
 
