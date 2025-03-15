@@ -31,7 +31,7 @@ npm install react-native-secure-enclave-operations react-native-nitro-modules
 | Platform | Support               |
 | -------- | --------------------- |
 | iOS      | ✅                    |
-| macOS    | ✅                    |
+| MacOS    | ✅                    |
 | Android  | ✅                    |
 
 ### Directory Structure

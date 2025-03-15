@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.78.0):
     - hermes-engine/Pre-built (= 0.78.0)
   - hermes-engine/Pre-built (0.78.0)
-  - NitroModules (0.25.0):
+  - NitroModules (0.25.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1548,7 +1548,7 @@ PODS:
     - React-logger (= 0.78.0)
     - React-perflogger (= 0.78.0)
     - React-utils (= 0.78.0)
-  - SecureEnclaveOperations (0.0.3):
+  - SecureEnclaveOperations (0.0.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1796,7 +1796,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: b417d2b2aee3b89b58e63e23a51e02be91dc876d
-  NitroModules: a0312133dd4528bcc8a8898ec12db73d0ea741dd
+  NitroModules: 7a9f9698e3f7068204b072ef6f46f213c79a98b5
   RCT-Folly: 36fe2295e44b10d831836cc0d1daec5f8abcf809
   RCTDeprecation: b2eecf2d60216df56bc5e6be5f063826d3c1ee35
   RCTRequired: 78522de7dc73b81f3ed7890d145fa341f5bb32ea
@@ -1855,7 +1855,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f2e81d80afd71a8058589e19d8a134243fa53f17
   ReactCodegen: a63a0ab6ae824aef2e8c744981edd718b16eb9f2
   ReactCommon: 3d39389f8e2a2157d5c999f8fba57bd1c8f226f0
-  SecureEnclaveOperations: f77a72c13ba5aacab088861f3d6fb7c7a633bf51
+  SecureEnclaveOperations: adba57c85952c993e8b9c69b463c0e45ed86fe62
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: afd04ff05ebe0121a00c468a8a3c8080221cb14c
 

@@ -8986,18 +8986,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nitro-codegen@npm:^0.25.0":
-  version: 0.25.0
-  resolution: "nitro-codegen@npm:0.25.0"
+"nitro-codegen@npm:^0.25.1":
+  version: 0.25.1
+  resolution: "nitro-codegen@npm:0.25.1"
   dependencies:
     chalk: ^5.3.0
-    react-native-nitro-modules: ^0.25.0
+    react-native-nitro-modules: ^0.25.1
     ts-morph: ^25.0.0
     yargs: ^17.7.2
     zod: ^3.23.8
   bin:
     nitro-codegen: lib/index.js
-  checksum: 1ad62dac8168d80a4d4bc2e4ac41126ed801b459f53454f987d5b697f83be4d9d6fc1de4499dd3310baf846e2ed6f58975cb71b4d0d1a117abaf1dc74b063cee
+  checksum: f5f649405fe6bb10e372a19b8849d9503bcdecfcdc20133661135fcb7344c197dbc4e7ec673b125cc36065e8af56338d04f275f734c189e576e99c020b7f4279
   languageName: node
   linkType: hard
 
@@ -10020,13 +10020,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-modules@npm:^0.25.0":
-  version: 0.25.0
-  resolution: "react-native-nitro-modules@npm:0.25.0"
+"react-native-nitro-modules@npm:^0.25.1":
+  version: 0.25.1
+  resolution: "react-native-nitro-modules@npm:0.25.1"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: cacc71afb83aacb92f9271e9d410d2df70123cb7ff100c370334ef91509d677893c9baa8cd928b78493551310eed27fcab39f6e90dc2e4a5f5286d7648fa867d
+  checksum: f53fb7c1c1d00757c769cfbd0a2ac1263110d367c90dece81a9f289af15da02106f25e41af6473ec8aade4bd55040f32c69ab57073a616dca7635a062f96f6a8
   languageName: node
   linkType: hard
 
@@ -10046,7 +10046,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.78.0
     react-native-builder-bob: ^0.36.0
-    react-native-nitro-modules: ^0.25.0
+    react-native-nitro-modules: ^0.25.1
     react-native-uuid: ^2.0.3
   languageName: unknown
   linkType: soft
@@ -10064,19 +10064,19 @@ __metadata:
     eslint-config-prettier: ^9.0.0
     eslint-plugin-prettier: ^5.0.1
     jest: ^29.7.0
-    nitro-codegen: ^0.25.0
+    nitro-codegen: ^0.25.1
     prettier: ^3.0.3
     react: 19.0.0
     react-native: 0.78.0
     react-native-builder-bob: ^0.37.0
-    react-native-nitro-modules: ^0.25.0
+    react-native-nitro-modules: ^0.25.1
     release-it: ^17.10.0
     turbo: ^1.10.7
     typescript: ^5.2.2
   peerDependencies:
     react: "*"
     react-native: "*"
-    react-native-nitro-modules: ^0.25.0
+    react-native-nitro-modules: ^0.25.1
   languageName: unknown
   linkType: soft
 
