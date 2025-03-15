@@ -34,6 +34,16 @@ npm install react-native-secure-enclave-operations react-native-nitro-modules
 | macOS    | ✅                    |
 | Android  | ✅                    |
 
+### Directory Structure
+```
+|-android/ (Kotlin implementation for Android)
+|-ios/ (Swift implementation for iOS)
+|-src/ (TypeScript definitions methods for NitroModules)
+|-server (Sample Node.js implementation for server)
+|-example (Sample React Native implementation for React Native)
+  |-src/
+```
+
 ## API Reference
 
 ### App Attestation (iOS)
@@ -112,6 +122,9 @@ import {
   generateAssertionIos,
 } from 'react-native-secure-enclave-operations';
 
+// NOTE: The server functions are placeholders.
+// Check the server/ directory for a sample implementation.
+
 // Check if device supports hardware-backed key generation
 const isSupported = await isHardwareBackedKeyGenerationSupportedIos();
 if (!isSupported) {
@@ -162,6 +175,9 @@ import {
 } from 'react-native-secure-enclave-operations';
 import uuid from 'react-native-uuid';
 
+// NOTE: The server functions are placeholders.
+// Check the server/ directory for a sample implementation.
+
 // Check if Play Services is available
 const isAvailable = await isPlayServicesAvailableAndroid();
 if (!isAvailable) {
@@ -195,8 +211,7 @@ await verifyAttestationWithServer(attestation);
 See the [example app](https://github.com/niteshbalusu11/react-native-secure-enclave-operations/tree/main/example).
 
 ### Server side implementation
-See this library [node-app-attest](https://github.com/uebelack/node-app-attest)
-This is an example implementation [node-app-attest-example](https://github.com/uebelack/node-app-attest-example)
+See this [server/](https://github.com/niteshbalusu11/react-native-secure-enclave-operations/tree/master/server/) directory for details on how to implement the server-side verification.
 
 ## Security Considerations
 
