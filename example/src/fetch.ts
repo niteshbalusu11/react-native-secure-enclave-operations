@@ -134,8 +134,10 @@ export const verifyAndroidIntegrityToken = async ({
 
 export const verifyAndroidAttestation = async ({
   attestation,
+  challenge,
 }: {
   attestation: string;
+  challenge?: string;
 }) => {
   try {
     const response = await fetch(
@@ -145,7 +147,10 @@ export const verifyAndroidAttestation = async ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ attestation }),
+        body: JSON.stringify({
+          attestation,
+          challenge,
+        }),
       }
     );
 

@@ -55,16 +55,18 @@ export default function AndroidApp() {
     try {
       // Generate another challenge for subsequent assertions
       const challenge = await getChallenge();
+      const keyId = uuid.v4() as string;
 
-      const attestation = await getAttestationAndroid(challenge, uuid.v4());
-      console.log('assertion result is ', attestation);
+      const attestation = await getAttestationAndroid(challenge, keyId);
+      console.log('attestation result is ', attestation);
 
-      // Verify assertion
+      // Pass the challenge to the verification function
       await verifyAndroidAttestation({
         attestation,
+        challenge,
       });
     } catch (err) {
-      console.error('error generating assertion', err);
+      console.error('error generating attestation', err);
     }
   };
   return (

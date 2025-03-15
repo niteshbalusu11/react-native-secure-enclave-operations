@@ -57,6 +57,7 @@ router.post('/verifyIntegrityToken', async (req, res) => {
  * On Android it is represented as a chain of X.509 certificates.
  * See {@link verifyAttestation} for more details.
  * @param attestation - The key attestation to verify
+ * @param challenge - The challenge that was used to generate the attestation
  * @returns The result of the chain verification.
  */
 router.post('/verifyAttestation', async (req, res) => {
@@ -64,12 +65,23 @@ router.post('/verifyAttestation', async (req, res) => {
     `Key attestation verdict was requested: ${JSON.stringify(req.body, null, 2)}`
   );
   try {
-    await verifyAttestation(req.body.attestation);
+    // Get the nonce from the server context
+    const { attestation, challenge } = req.body;
+
+    // Import the nonce from the main server file
+    const { nonce } = await import('../index.ts');
+
+    // Validate the challenge matches the server's nonce
+    if (!challenge || challenge !== nonce) {
+      throw new Error('Invalid or missing challenge');
+    }
+
+    await verifyAttestation(attestation, challenge);
     res.status(200).send({ result: 'Attestation verified' });
   } catch (error) {
     console.error(error);
     res.status(500).send({
-      error: `An error occurred while verifying the key attestation token ${error}`,
+      error: `An error occurred while verifying the key attestation token: ${error}`,
     });
   }
 });

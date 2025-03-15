@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const port = Bun.env.PORT || 3000;
-let nonce = uuid();
+export let nonce = uuid();
 
 // Please note that this is a simple example and the attestation should be stored in a secure way.
 // Every time the server restarts, the attestation is lost. Every time the app verify the attestation
