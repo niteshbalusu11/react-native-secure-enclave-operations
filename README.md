@@ -39,8 +39,8 @@ npm install react-native-secure-enclave-operations react-native-nitro-modules
 |-android/ (Kotlin implementation for Android)
 |-ios/ (Swift implementation for iOS)
 |-src/ (TypeScript definitions methods for NitroModules)
-|-server (Sample Node.js implementation for server)
-|-example (Sample React Native implementation for React Native)
+|-server/ (Sample Node.js implementation for server)
+|-example/ (Sample React Native client side implementation)
   |-src/
 ```
 
