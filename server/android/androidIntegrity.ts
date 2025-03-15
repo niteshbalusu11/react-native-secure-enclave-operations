@@ -18,7 +18,6 @@ type CRL = {
 // Certificate Revocation status List
 // https://developer.android.com/privacy-and-security/security-key-attestation#certificate_status
 const CRL_URL = 'https://android.googleapis.com/attestation/status';
-
 // Key attestation extension data schema OID
 // https://developer.android.com/privacy-and-security/security-key-attestation#key_attestation_ext_schema
 const KEY_OID = '1.3.6.1.4.1.11129.2.1.17';
@@ -74,93 +73,79 @@ export const verifyAttestation = async (
   x509Array: string,
   expectedChallenge: string
 ) => {
-  try {
-    // Decode attestation from base64
-    const decodedString = Buffer.from(x509Array, 'base64').toString('utf-8');
+  // We split the chain of certificates and convert them to PEM format to be parsed by the X509Certificate class
+  const decodedString = Buffer.from(x509Array, 'base64').toString('utf-8');
 
-    // Parse certificate chain (split by |)
-    const certificates = decodedString.split('|');
-    console.log(`Found ${certificates.length} certificates in the chain`);
+  // Use the new delimiter
+  const certificates = decodedString.split('|');
+  const x509Chain = certificates.map((cert) => {
+    // Format as proper PEM with newlines every 64 characters
+    const formatted = cert.replace(/(.{64})/g, '$1\n');
+    return new X509Certificate(base64ToPem(formatted));
+  });
+  validateIssuance(x509Chain);
+  await validateRevokation(x509Chain);
+  validateKeyAttestationExtension(x509Chain);
 
-    // Convert to X.509 certificates
-    const x509Chain = certificates.map((cert, index) => {
-      try {
-        const formatted = cert.replace(/(.{64})/g, '$1\n');
-        return new X509Certificate(base64ToPem(formatted));
-      } catch (e) {
-        console.error(`Error parsing certificate ${index}: ${e}`);
-        throw e;
-      }
-    });
+  // The attestation certificate is the first one in the chain
+  const attestationCert = x509Chain[0];
 
-    // Validate the certificate chain issuance
-    validateIssuance(x509Chain);
+  // For Android Key Attestation, we need to check the attestation extension in the leaf certificate
+  const rawCertData = attestationCert.raw;
 
-    // Check certificate revocation status
-    await validateRevocation(x509Chain);
+  // Parse the certificate ASN.1 structure
+  const asn1 = asn1js.fromBER(rawCertData);
+  const certificate = new pkijs.Certificate({ schema: asn1.result });
 
-    // Validate key attestation extension presence
-    validateKeyAttestationExtension(x509Chain);
+  console.log('Analyzing certificate extensions:');
 
-    // The attestation certificate is the first one in the chain
-    const attestationCert = x509Chain[0];
-
-    // For Android Key Attestation, we need to check the attestation extension in the leaf certificate
-    const rawCertData = attestationCert.raw;
-
-    // Parse the certificate ASN.1 structure
-    const asn1 = asn1js.fromBER(rawCertData);
-    const certificate = new pkijs.Certificate({ schema: asn1.result });
-
-    console.log('Analyzing certificate extensions:');
-
-    // Look for key attestation data in certificate extensions
-    if (!certificate.extensions || certificate.extensions.length === 0) {
-      throw new Error('Certificate contains no extensions');
-    }
-
-    // Log all extensions to help debugging
-    certificate.extensions.forEach((ext) => {
-      console.log(`Extension: ${ext.extnID}`);
-    });
-
-    // Android KeyStore attestation data is in the certificate as a special extension
-    // Now let's look for the challenge in AuthorizationList in the certificate
-    // The challenge may be embedded in various places in the certificate
-
-    // First, let's dump the raw certificate data for analysis
-    const certHex = attestationCert.raw.toString('hex');
-
-    // Look for the challenge in the raw certificate data
-    const challengeHex = Buffer.from(expectedChallenge).toString('hex');
-
-    if (certHex.includes(challengeHex)) {
-      console.log('Found challenge in raw certificate data!');
-      console.log(`Challenge verified: ${expectedChallenge}`);
-      return { verified: true, message: 'Challenge found in certificate data' };
-    }
-
-    throw new Error('Challenge not found in attestation certificate');
-  } catch (error) {
-    console.error('Attestation verification failed:', error);
-    throw error;
+  // Look for key attestation data in certificate extensions
+  if (!certificate.extensions || certificate.extensions.length === 0) {
+    throw new Error('Certificate contains no extensions');
   }
+
+  // Log all extensions to help debugging
+  certificate.extensions.forEach((ext) => {
+    console.log(`Extension: ${ext.extnID}`);
+  });
+
+  // Android KeyStore attestation data is in the certificate as a special extension
+  // Now let's look for the challenge in AuthorizationList in the certificate
+  // The challenge may be embedded in various places in the certificate
+
+  // First, let's dump the raw certificate data for analysis
+  const certHex = attestationCert.raw.toString('hex');
+
+  // Look for the challenge in the raw certificate data
+  const challengeHex = Buffer.from(expectedChallenge).toString('hex');
+
+  if (certHex.includes(challengeHex)) {
+    console.log('Found challenge in raw certificate data!');
+    console.log(`Challenge verified: ${expectedChallenge}`);
+    return { verified: true, message: 'Challenge found in certificate data' };
+  }
+
+  throw new Error('Challenge not found in attestation certificate');
 };
 
 /**
- * Verify certificate chain issuance
+ * 3.
+ * Obtain a reference to the X.509 certificate chain parsing and validation library that is most appropriate for your toolset.
+ * Verify that the root public certificate is trustworthy and that each certificate signs the next certificate in the chain.
+ * @param x509Chain - The chain of {@link X509Certificate} certificates.
+ * @throws {Error} - If the chain is invalid.
  */
 const validateIssuance = (x509Chain: X509Certificate[]) => {
   if (x509Chain.length === 0) throw new Error('No certificates provided');
 
-  // Check certificate dates
+  // Check dates
   const now = new Date();
   const datesValid = x509Chain.every(
     (c) => new Date(c.validFrom) < now && now < new Date(c.validTo)
   );
   if (!datesValid) throw new Error('Certificates expired');
 
-  // Verify certificate chain
+  // Check that each certificate, except for the last, is issued by the subsequent one.
   if (x509Chain.length >= 2) {
     for (let i = 0; i < x509Chain.length - 1; i++) {
       const subject = x509Chain[i];
@@ -177,78 +162,58 @@ const validateIssuance = (x509Chain: X509Certificate[]) => {
     }
   }
 
-  // Verify root certificate
-  try {
-    const pkFile = fs.readFileSync(
-      require('path').resolve(__dirname, 'googleHardwareAttestationRoot.key')
+  // Ensure that the last certificate in the chain is the expected Google Hardware Attestation Root CA.
+  const pkFile = fs.readFileSync(
+    require('path').resolve(__dirname, 'googleHardwareAttestationRoot.key')
+  );
+  const pk = crypto.createPublicKey(pkFile);
+  const rootCert = x509Chain[x509Chain.length - 1]; // Last certificate in the chain is the root certificate
+  if (!rootCert || !rootCert.verify(pk)) {
+    throw new Error(
+      'Root certificate is not signed by Google Hardware Attestation Root CA'
     );
-    const pk = crypto.createPublicKey(pkFile);
-    const rootCert = x509Chain[x509Chain.length - 1];
-    if (!rootCert || !rootCert.verify(pk)) {
-      throw new Error(
-        'Root certificate is not signed by Google Hardware Attestation Root CA'
-      );
-    }
-  } catch (error) {
-    console.error('Error verifying root certificate:', error);
-    throw new Error('Failed to verify root certificate');
   }
 };
 
 /**
- * Check each certificate's revocation status
- * Ensures that none of the certificates have been revoked.
+ * 4.
+ * Check each certificate's revocation status to ensure that none of the certificates have been revoked.
+ * @param x509Chain - The chain of {@link X509Certificate} certificates.
+ * @throws {Error} - If any certificate in the chain is revoked.
  */
-const validateRevocation = async (x509Chain: X509Certificate[]) => {
+const validateRevokation = async (x509Chain: X509Certificate[]) => {
   if (x509Chain.length === 0) throw new Error('No certificates provided');
-  try {
-    const res = await fetch(CRL_URL, { method: 'GET' });
-    if (!res.ok) throw new Error('Failed to fetch CRL');
-    const crl = (await res.json()) as CRL;
-    const isExpired = x509Chain.some((cert) => {
-      return cert.serialNumber in crl.entries;
-    });
-    if (isExpired) throw new Error('Certificate is revoked');
-    console.log('✅ Certificate revocation check passed');
-  } catch (error) {
-    console.error('Error checking revocation status:', error);
-    throw new Error(`Failed to check certificate revocation: ${error.message}`);
-  }
+  const res = await fetch(CRL_URL, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch CRL');
+  const crl = (await res.json()) as CRL; // Add type assertion for crl
+  const isExpired = x509Chain.some((cert) => {
+    return cert.serialNumber in crl.entries;
+  });
+  if (isExpired) throw new Error('Certificate is revoked');
 };
 
 /**
- * Validate key attestation extension
- * Finds the certificate that contains the key attestation certificate extension.
+ * 6.
+ * Obtain a reference to the ASN.1 parser library that is most appropriate for your toolset.
+ * Find the nearest certificate to the root that contains the key attestation certificate extension.
+ *  If the provisioning information certificate extension was present, the key attestation certificate extension must be in the immediately subsequent certificate.
+ *  Use the parser to extract the key attestation certificate extension data from that certificate.
+ * @param x509Chain - The chain of {@link X509Certificate} certificates.
+ * @throws {Error} - If no key attestation extension is found.
  */
 const validateKeyAttestationExtension = (x509Chain: X509Certificate[]) => {
   if (x509Chain.length === 0) throw new Error('No certificates provided');
-  try {
-    const found = x509Chain.some((certificate) => {
-      const asn1 = asn1js.fromBER(certificate.raw);
-      const parsedCertificate = new pkijs.Certificate({ schema: asn1.result });
-      const extension = parsedCertificate.extensions?.find(
-        (e) => e.extnID === KEY_OID
-      );
-      return extension ?? false;
-    });
-
-    if (!found) {
-      console.warn(
-        '⚠️ No key attestation extension found with OID 1.3.6.1.4.1.11129.2.1.17'
-      );
-      throw new Error('No key attestation extension found');
-    } else {
-      console.log('✅ Key attestation extension found');
-    }
-  } catch (error) {
-    console.error('Error validating key attestation extension:', error);
-    throw new Error(
-      `Failed to validate key attestation extension: ${error.message}`
+  const found = [...x509Chain].reverse().some((certificate) => {
+    const asn1 = asn1js.fromBER(certificate.raw);
+    const parsedCertificate = new pkijs.Certificate({ schema: asn1.result });
+    const extension = parsedCertificate.extensions?.find(
+      (e) => e.extnID === KEY_OID
     );
-  }
+    return extension ?? false;
+  });
+  if (!found) throw new Error('No key attestation extension found');
 };
 
-// Helper function to convert base64 certificate to PEM format
 const base64ToPem = (b64cert: string) => {
   return (
     '-----BEGIN CERTIFICATE-----\n' +
