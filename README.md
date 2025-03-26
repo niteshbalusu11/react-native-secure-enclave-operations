@@ -16,7 +16,7 @@ Perform cryptographic operations using Apple's Secure Enclave and App Attestatio
 
 - iOS 14.0 or newer
 - Devices with Secure Enclave (iPhone 5s or newer)
-- React Native 0.68.0 or newer
+- React Native 0.75.0 or newer
 
 ## Installation
 
