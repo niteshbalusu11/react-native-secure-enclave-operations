@@ -66,7 +66,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Configure npm for publishing
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > react-native-nitro-ark/.npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
         shell: bash
 
       - name: Install dependencies for publishing
