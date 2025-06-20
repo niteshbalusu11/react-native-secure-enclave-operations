@@ -1,4 +1,4 @@
-package com.secureenclaveoperations
+package com.margelo.nitro.secureenclaveoperations
 
 import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule

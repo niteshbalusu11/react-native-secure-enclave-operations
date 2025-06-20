@@ -50,10 +50,10 @@ npm install react-native-secure-enclave-operations react-native-nitro-modules
 
 ```typescript
 /**
- * Check if App Attestation is supported on this device
- * @returns Promise<boolean> - True if the device supports App Attestation
+ * Check if hardware-backed key generation is supported on this device
+ * @returns Promise<boolean> - True if the device supports hardware-backed key generation
  */
-function isAttestationSupportedIos(): Promise<boolean>;
+function isHardwareBackedKeyGenerationSupportedIos(): Promise<boolean>;
 
 /**
  * Generate a new key pair in the Secure Enclave for App Attestation
