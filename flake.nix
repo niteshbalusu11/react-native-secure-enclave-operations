@@ -114,7 +114,6 @@
         let
           pkgs = pkgsFor system;
           androidSdk = androidSdkFor system;
-          scripts = darwinDerivations.scripts pkgs;
 
           basePackages = with pkgs; [
             yarn-berry_3
