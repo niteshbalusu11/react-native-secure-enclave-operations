@@ -52,6 +52,7 @@ function verifyAssertion(params: VerifyAssertionParams) {
   try {
     decodedAssertion = cbor.decodeAllSync(assertion)[0];
   } catch (e) {
+    console.error('invalid assertion', e);
     throw new Error('invalid assertion');
   }
 

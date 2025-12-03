@@ -35,16 +35,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-      
+
       - name: Enable Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
-      
+
       - name: Install example app dependencies
         run: nix develop .# --command bash -c "yarn install --immutable"
-      
+
       - name: Build example Android app
         run: nix develop .# --command bash -c "yarn example build:android"
 
@@ -55,15 +55,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-      
+
       - name: Enable Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
-      
+
       - name: Install example app dependencies
         run: nix develop .# --command bash -c "yarn install --immutable && yarn ios:prebuild"
-      
+
       - name: Build example iOS app
-        run: nix develop .# --command bash -c "yarn example build:ios"
+        run: nix develop .# --command bash -c "yarn example build:ios:xcode"

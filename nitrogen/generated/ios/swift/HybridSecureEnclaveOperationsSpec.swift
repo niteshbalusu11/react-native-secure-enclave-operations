@@ -24,9 +24,17 @@ public protocol HybridSecureEnclaveOperationsSpec_protocol: HybridObject {
   func getAttestationAndroid(challenge: String, keyId: String) throws -> Promise<String>
 }
 
+public extension HybridSecureEnclaveOperationsSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject SecureEnclaveOperations]"
+  }
+}
+
 /// See ``HybridSecureEnclaveOperationsSpec``
-public class HybridSecureEnclaveOperationsSpec_base {
+open class HybridSecureEnclaveOperationsSpec_base {
   private weak var cxxWrapper: HybridSecureEnclaveOperationsSpec_cxx? = nil
+  public init() { }
   public func getCxxWrapper() -> HybridSecureEnclaveOperationsSpec_cxx {
   #if DEBUG
     guard self is HybridSecureEnclaveOperationsSpec else {

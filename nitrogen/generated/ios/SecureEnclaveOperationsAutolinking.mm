@@ -24,7 +24,7 @@
   HybridObjectRegistry::registerHybridObjectConstructor(
     "SecureEnclaveOperations",
     []() -> std::shared_ptr<HybridObject> {
-      std::shared_ptr<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpec> hybridObject = SecureEnclaveOperations::SecureEnclaveOperationsAutolinking::createSecureEnclaveOperations();
+      std::shared_ptr<HybridSecureEnclaveOperationsSpec> hybridObject = SecureEnclaveOperations::SecureEnclaveOperationsAutolinking::createSecureEnclaveOperations();
       return hybridObject;
     }
   );

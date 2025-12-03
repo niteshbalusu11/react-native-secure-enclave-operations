@@ -45,9 +45,14 @@ namespace margelo::nitro::secureenclaveoperations {
     }
 
   public:
-    // Get memory pressure
     inline size_t getExternalMemorySize() noexcept override {
       return _swiftPart.getMemorySize();
+    }
+    void dispose() noexcept override {
+      _swiftPart.dispose();
+    }
+    std::string toString() override {
+      return _swiftPart.toString();
     }
 
   public:

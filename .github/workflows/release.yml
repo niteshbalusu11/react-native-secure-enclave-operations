@@ -14,16 +14,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-      
+
       - name: Enable Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
-      
+
       - name: Install React Native app dependencies
         run: nix develop .# --command bash -c "yarn install --immutable"
-      
+
       - name: Build example Android app
         run: nix develop .# --command bash -c "yarn example build:android"
 
@@ -32,18 +32,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-      
+
       - name: Enable Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
-      
+
       - name: Install React Native app dependencies and Bundle for iOS example
         run: nix develop .# --command bash -c "yarn install --immutable && yarn example ios:prebuild"
-      
+
       - name: Build example iOS app
-        run: nix develop .# --command bash -c "yarn example build:ios"
+        run: nix develop .# --command bash -c "yarn example build:ios:xcode"
 
   publish_npm_and_github_release:
     runs-on: ubuntu-latest
@@ -58,10 +58,10 @@ jobs:
         with:
           ref: ${{ github.ref }} # Checkout the specific tag
           fetch-depth: 0 # release-it needs full history
-      
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-      
+
       - name: Enable Nix Magic Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 

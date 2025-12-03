@@ -39,12 +39,11 @@ export const verifyIntegrityToken = async (
   packageName: string,
   integrityToken: string
 ) => {
-  let jwtClient = new google.auth.JWT(
-    credentialClientEmail,
-    undefined,
-    credentialPrivateKey,
-    ['https://www.googleapis.com/auth/playintegrity']
-  );
+  let jwtClient = new google.auth.JWT({
+    email: credentialClientEmail,
+    key: credentialPrivateKey,
+    scopes: ['https://www.googleapis.com/auth/playintegrity'],
+  });
   google.options({ auth: jwtClient });
   return await playintegrity.v1.decodeIntegrityToken({
     packageName,
