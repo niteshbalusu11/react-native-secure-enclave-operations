@@ -4,7 +4,6 @@ import {
   ANDROID_BUNDLE_IDENTIFIER,
   GOOGLE_APPLICATION_CREDENTIALS,
 } from '../index.ts';
-import { Buffer } from 'node:buffer';
 
 const router: Router = express.Router();
 

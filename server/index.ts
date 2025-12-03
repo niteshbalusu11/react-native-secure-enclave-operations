@@ -131,7 +131,8 @@ app.listen(port, () => {
       JSON.parse(GOOGLE_APPLICATION_CREDENTIALS);
     } catch (error) {
       console.warn(
-        '[server] GOOGLE_APPLICATION_CREDENTIALS is not a valid JSON in .env'
+        '[server] GOOGLE_APPLICATION_CREDENTIALS is not a valid JSON in .env',
+        error
       );
     }
   }
