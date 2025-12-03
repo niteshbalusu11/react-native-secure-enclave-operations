@@ -36,11 +36,11 @@
         android-nixpkgs.sdk.${system} (
           sdkPkgs: with sdkPkgs; [
             cmdline-tools-latest
-            build-tools-34-0-0
             build-tools-35-0-0
+            build-tools-36-0-0
             platform-tools
-            platforms-android-34
             platforms-android-35
+            platforms-android-36
             ndk-27-1-12297006
             ndk-27-0-12077973
             ndk-26-1-10909125
@@ -53,7 +53,7 @@
         xcode-wrapper =
           pkgs:
           pkgs.stdenv.mkDerivation {
-            name = "xcode-wrapper-16.2.0";
+            name = "xcode-wrapper-16.4.0";
             buildInputs = [ pkgs.darwin.cctools ];
             buildCommand = ''
               mkdir -p $out/bin
@@ -91,10 +91,12 @@
 
               chmod +x $out/bin/*
 
-              if [ -d "/Applications/Xcode.app" ]; then
+              if [ -d "/Applications/Xcode-beta.app" ]; then
+                DEVELOPER_DIR="/Applications/Xcode-beta.app/Contents/Developer"
+              elif [ -d "/Applications/Xcode.app" ]; then
                 DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
-              elif [ -d "/Applications/Xcode-16.2.0.app" ]; then
-                DEVELOPER_DIR="/Applications/Xcode-16.2.0.app/Contents/Developer"
+              elif [ -d "/Applications/Xcode-16.4.0.app" ]; then
+                DEVELOPER_DIR="/Applications/Xcode-16.4.0.app/Contents/Developer"
               else
                 echo "Error: Xcode not found"
                 exit 1
@@ -116,22 +118,28 @@
 
           basePackages = with pkgs; [
             androidSdk
+            autoconf
+            automake
+            libtool
+            openssl
+            rustup
+            protobuf
+            nodejs_24
+            iconv
+            pkg-config
+            jdk17
           ];
 
           darwinPackages = with pkgs; [
-            ruby
             bundler
-            darwin.apple_sdk.frameworks.CoreServices
-            darwin.apple_sdk.frameworks.CoreFoundation
-            darwin.apple_sdk.frameworks.Foundation
-            darwin.apple_sdk.frameworks.Security
-            darwin.apple_sdk.frameworks.SystemConfiguration
+            cocoapods
             (darwinDerivations.xcode-wrapper pkgs)
           ];
 
           darwinHook = ''
             export LC_ALL=en_US.UTF-8
             export LANG=en_US.UTF-8
+            export JAVA_HOME="${pkgs.jdk17.home}"
 
             if [ -f "${darwinDerivations.xcode-wrapper pkgs}/bin/env.sh" ]; then
               source "${darwinDerivations.xcode-wrapper pkgs}/bin/env.sh"
@@ -142,13 +150,13 @@
 
             echo "iOS development environment:"
             echo "DEVELOPER_DIR: $DEVELOPER_DIR"
-            echo "SDKROOT: $SDKROOT"
             xcodebuild -version
           '';
 
           linuxHook = ''
             export LC_ALL=en_US.UTF-8
             export LANG=en_US.UTF-8
+            export JAVA_HOME="${pkgs.jdk17.home}"
           '';
 
         in
