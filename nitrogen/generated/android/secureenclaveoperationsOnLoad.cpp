@@ -16,7 +16,6 @@
 #include <NitroModules/HybridObjectRegistry.hpp>
 
 #include "JHybridSecureEnclaveOperationsSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::secureenclaveoperations {
@@ -36,8 +35,7 @@ int initialize(JavaVM* vm) {
       []() -> std::shared_ptr<HybridObject> {
         static DefaultConstructableObject<JHybridSecureEnclaveOperationsSpec::javaobject> object("com/margelo/nitro/secureenclaveoperations/SecureEnclaveOperations");
         auto instance = object.create();
-        auto globalRef = jni::make_global(instance);
-        return JNISharedPtr::make_shared_from_jni<JHybridSecureEnclaveOperationsSpec>(globalRef);
+        return instance->cthis()->shared();
       }
     );
   });

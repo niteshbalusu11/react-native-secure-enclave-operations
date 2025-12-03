@@ -17,7 +17,7 @@ import NitroModules
  * - Other HybridObjects need to be wrapped/unwrapped from the Swift TCxx wrapper
  * - Throwing methods need to be wrapped with a Result<T, Error> type, as exceptions cannot be propagated to C++
  */
-public class HybridSecureEnclaveOperationsSpec_cxx {
+open class HybridSecureEnclaveOperationsSpec_cxx {
   /**
    * The Swift <> C++ bridge's namespace (`margelo::nitro::secureenclaveoperations::bridge::swift`)
    * from `SecureEnclaveOperations-Swift-Cxx-Bridge.hpp`.
@@ -33,7 +33,7 @@ public class HybridSecureEnclaveOperationsSpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridSecureEnclaveOperationsSpec_
 
   /**
    * Create a new `HybridSecureEnclaveOperationsSpec_cxx` that wraps the given `HybridSecureEnclaveOperationsSpec`.
@@ -72,15 +72,15 @@ public class HybridSecureEnclaveOperationsSpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpec>`.
+   * The C++ part is a `std::shared_ptr<HybridSecureEnclaveOperationsSpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridSecureEnclaveOperationsSpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
-    if cachedCxxPart.__convertToBool() {
+    if Bool(fromCxx: cachedCxxPart) {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridSecureEnclaveOperationsSpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridSecureEnclaveOperationsSpec_(newCxxPart)
       return newCxxPart
     }
   }
@@ -94,6 +94,23 @@ public class HybridSecureEnclaveOperationsSpec_cxx {
   @inline(__always)
   public var memorySize: Int {
     return MemoryHelper.getSizeOf(self.__implementation) + self.__implementation.memorySize
+  }
+
+  /**
+   * Call dispose() on the Swift class.
+   * This _may_ be called manually from JS.
+   */
+  @inline(__always)
+  public func dispose() {
+    self.__implementation.dispose()
+  }
+
+  /**
+   * Call toString() on the Swift class.
+   */
+  @inline(__always)
+  public func toString() -> String {
+    return self.__implementation.toString()
   }
 
   // Properties

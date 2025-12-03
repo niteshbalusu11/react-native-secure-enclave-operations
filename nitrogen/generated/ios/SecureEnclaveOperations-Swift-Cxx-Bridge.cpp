@@ -10,11 +10,12 @@
 // Include C++ implementation defined types
 #include "HybridSecureEnclaveOperationsSpecSwift.hpp"
 #include "SecureEnclaveOperations-Swift-Cxx-Umbrella.hpp"
+#include <NitroModules/NitroDefines.hpp>
 
 namespace margelo::nitro::secureenclaveoperations::bridge::swift {
 
   // pragma MARK: std::function<void(bool /* result */)>
-  Func_void_bool create_Func_void_bool(void* _Nonnull swiftClosureWrapper) {
+  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = SecureEnclaveOperations::Func_void_bool::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](bool result) mutable -> void {
       swiftClosure.call(result);
@@ -22,7 +23,7 @@ namespace margelo::nitro::secureenclaveoperations::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
-  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* _Nonnull swiftClosureWrapper) {
+  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = SecureEnclaveOperations::Func_void_std__exception_ptr::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::exception_ptr& error) mutable -> void {
       swiftClosure.call(error);
@@ -30,25 +31,25 @@ namespace margelo::nitro::secureenclaveoperations::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const std::string& /* result */)>
-  Func_void_std__string create_Func_void_std__string(void* _Nonnull swiftClosureWrapper) {
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = SecureEnclaveOperations::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
       swiftClosure.call(result);
     };
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpec>
-  std::shared_ptr<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpec> create_std__shared_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridSecureEnclaveOperationsSpec>
+  std::shared_ptr<HybridSecureEnclaveOperationsSpec> create_std__shared_ptr_HybridSecureEnclaveOperationsSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     SecureEnclaveOperations::HybridSecureEnclaveOperationsSpec_cxx swiftPart = SecureEnclaveOperations::HybridSecureEnclaveOperationsSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_(std__shared_ptr_margelo__nitro__secureenclaveoperations__HybridSecureEnclaveOperationsSpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridSecureEnclaveOperationsSpec_(std__shared_ptr_HybridSecureEnclaveOperationsSpec_ cppType) {
     std::shared_ptr<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::secureenclaveoperations::HybridSecureEnclaveOperationsSpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridSecureEnclaveOperationsSpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     SecureEnclaveOperations::HybridSecureEnclaveOperationsSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }

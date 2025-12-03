@@ -29,6 +29,7 @@ namespace margelo::nitro::secureenclaveoperations {
     // C++ constructor (called from Java via `initHybrid()`)
     explicit JHybridSecureEnclaveOperationsSpec(jni::alias_ref<jhybridobject> jThis) :
       HybridObject(HybridSecureEnclaveOperationsSpec::TAG),
+      HybridBase(jThis),
       _javaPart(jni::make_global(jThis)) {}
 
   public:
@@ -39,6 +40,8 @@ namespace margelo::nitro::secureenclaveoperations {
 
   public:
     size_t getExternalMemorySize() noexcept override;
+    void dispose() noexcept override;
+    std::string toString() override;
 
   public:
     inline const jni::global_ref<JHybridSecureEnclaveOperationsSpec::javaobject>& getJavaPart() const noexcept {

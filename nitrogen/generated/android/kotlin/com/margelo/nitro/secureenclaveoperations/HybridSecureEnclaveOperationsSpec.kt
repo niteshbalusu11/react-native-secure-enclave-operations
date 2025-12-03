@@ -10,7 +10,8 @@ package com.margelo.nitro.secureenclaveoperations
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
+import com.margelo.nitro.core.Promise
+import com.margelo.nitro.core.HybridObject
 
 /**
  * A Kotlin class representing the SecureEnclaveOperations HybridObject.
@@ -34,6 +35,11 @@ abstract class HybridSecureEnclaveOperationsSpec: HybridObject() {
   override fun updateNative(hybridData: HybridData) {
     mHybridData = hybridData
     super.updateNative(hybridData)
+  }
+
+  // Default implementation of `HybridObject.toString()`
+  override fun toString(): String {
+    return "[HybridObject SecureEnclaveOperations]"
   }
 
   // Properties
@@ -75,6 +81,6 @@ abstract class HybridSecureEnclaveOperationsSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridSecureEnclaveOperationsSpec"
+    protected const val TAG = "HybridSecureEnclaveOperationsSpec"
   }
 }

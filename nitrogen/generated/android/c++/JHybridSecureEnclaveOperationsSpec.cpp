@@ -30,6 +30,17 @@ namespace margelo::nitro::secureenclaveoperations {
     return method(_javaPart);
   }
 
+  void JHybridSecureEnclaveOperationsSpec::dispose() noexcept {
+    static const auto method = javaClassStatic()->getMethod<void()>("dispose");
+    method(_javaPart);
+  }
+
+  std::string JHybridSecureEnclaveOperationsSpec::toString() {
+    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
+    auto javaString = method(_javaPart);
+    return javaString->toStdString();
+  }
+
   // Properties
   
 
