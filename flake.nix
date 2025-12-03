@@ -114,19 +114,11 @@
         let
           pkgs = pkgsFor system;
           androidSdk = androidSdkFor system;
-          scripts = darwinDerivations.scripts pkgs;
 
           basePackages = with pkgs; [
+            yarn-berry_3
             androidSdk
-            autoconf
-            automake
-            libtool
-            openssl
-            rustup
-            protobuf
             nodejs_24
-            iconv
-            pkg-config
             jdk17
           ];
 

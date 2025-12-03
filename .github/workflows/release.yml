@@ -33,17 +33,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
 
-      - name: Enable Nix Magic Cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Install React Native app dependencies and Bundle for iOS example
-        run: nix develop .# --command bash -c "yarn install --immutable && yarn example ios:prebuild"
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Prebuild iOS example
+        run: yarn example ios:prebuild
 
       - name: Build example iOS app
-        run: nix develop .# --command bash -c "yarn example build:ios:xcode"
+        run: yarn example build:ios:xcode
 
   publish_npm_and_github_release:
     runs-on: ubuntu-latest
@@ -59,21 +64,22 @@ jobs:
           ref: ${{ github.ref }} # Checkout the specific tag
           fetch-depth: 0 # release-it needs full history
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
 
-      - name: Enable Nix Magic Cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Configure npm for publishing
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-        shell: bash
 
-      - name: Install dependencies for publishing
-        run: nix develop .# --command bash -c "yarn install --immutable"
+      - name: Install dependencies
+        run: yarn install --immutable
 
       - name: Prepare package for release
-        run: nix develop .# --command bash -c "yarn prepare"
+        run: yarn prepare
 
       - name: Publish to npm and Create GitHub Release
         env:
@@ -83,4 +89,4 @@ jobs:
           TAG_NAME="${{ github.ref_name }}"
           VERSION="${TAG_NAME#v}" # Strip 'v' prefix if present
           echo "Releasing version: $VERSION based on tag: $TAG_NAME"
-          nix develop .# --command bash -c "yarn release $VERSION --ci --no-git"
+          yarn release $VERSION --ci --no-git
