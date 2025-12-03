@@ -2282,7 +2282,7 @@ PODS:
     - React-perflogger (= 0.81.5)
     - React-utils (= 0.81.5)
     - SocketRocket
-  - SecureEnclaveOperations (0.0.7):
+  - SecureEnclaveOperations (0.0.8):
     - boost
     - DoubleConversion
     - fast_float
@@ -2616,7 +2616,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: c277c5b231881ad4f00cd59e3aa0671b99d7ebee
   ReactCodegen: 0936e9ff5fd359d5f6b5173c2a90e91b446d33a3
   ReactCommon: 8df6e27c060970b9fb77a86e69a1cf9b934ea458
-  SecureEnclaveOperations: 02ffe15e4cc3a129e0c433fd999f305115c42685
+  SecureEnclaveOperations: 58d927540b0ce6818ac884615177e217311748e2
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 728df40394d49f3f471688747cf558158b3a3bd1
 
