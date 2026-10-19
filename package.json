@@ -116,6 +116,7 @@
     },
     "npm": {
       "publish": true,
+      "skipChecks": true,
       "allowSameVersion": true
     },
     "github": {
