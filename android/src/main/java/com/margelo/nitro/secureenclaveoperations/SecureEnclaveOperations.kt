@@ -24,8 +24,7 @@ import java.security.KeyFactory
 
 @DoNotStrip
 @Keep
-class SecureEnclaveOperations(private val reactContext: ReactApplicationContext) :
-  HybridSecureEnclaveOperationsSpec() {
+class SecureEnclaveOperations : HybridSecureEnclaveOperationsSpec() {
   private val logTag = "SecureEnclaveOps"
   private var integrityTokenProvider: StandardIntegrityManager.StandardIntegrityTokenProvider? =
     null
@@ -35,9 +34,16 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     secureenclaveoperationsOnLoad.initializeNative()
   }
 
+  // Nitro creates this HybridObject through its no-arg constructor,
+  // so the React context comes from NitroModules instead of being injected.
+  private fun requireContext(): ReactApplicationContext {
+    return NitroModules.applicationContext
+      ?: throw IllegalStateException("React application context is not available")
+  }
+
   override fun isPlayServicesAvailableAndroid(): Promise<Boolean> {
     return Promise.async {
-      val context = NitroModules.applicationContext ?: reactContext
+      val context = requireContext()
 
       val status =
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
@@ -56,7 +62,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
         // Convert string to long
         val cpn = cloudProjectNumber.toLong()
 
-        val context = NitroModules.applicationContext ?: reactContext
+        val context = requireContext()
 
         // Get the integrity manager
         val standardIntegrityManager = IntegrityManagerFactory.createStandard(context)
@@ -138,7 +144,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   override fun getAttestationAndroid(challenge: String, keyId: String): Promise<String> {
     return Promise.async {
       try {
-        val context = NitroModules.applicationContext ?: reactContext
+        val context = requireContext()
 
         // Check if key already exists and delete it if needed
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
@@ -265,7 +271,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
     return Promise.async {
       try {
         // Get application context from NitroModules
-        val context = NitroModules.applicationContext ?: reactContext
+        val context = requireContext()
 
         val isStrongBoxSupported =
           context.packageManager.hasSystemFeature(
@@ -300,7 +306,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   private fun isBiometricEnabled(): Boolean {
     return try {
       // Get application context from NitroModules
-      val context = NitroModules.applicationContext ?: reactContext
+      val context = requireContext()
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val packageManager = context.packageManager
@@ -325,7 +331,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   // Check if user has set up biometrics on the device
   private fun isBiometricEnrolled(): Boolean {
     return try {
-      val context = NitroModules.applicationContext ?: reactContext
+      val context = requireContext()
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         // For Android Q (API 29) and above, use BiometricManager from android.hardware.biometrics
@@ -357,7 +363,7 @@ class SecureEnclaveOperations(private val reactContext: ReactApplicationContext)
   private fun getSecurityLevel(): String {
     return try {
       // Get application context from NitroModules
-      val context = NitroModules.applicationContext ?: reactContext
+      val context = requireContext()
 
       if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         PackageManager.FEATURE_STRONGBOX_KEYSTORE
