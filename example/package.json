@@ -12,24 +12,26 @@
     "build:ios:xcode": "xcodebuild build -workspace ios/SecureEnclaveOperationsExample.xcworkspace -scheme SecureEnclaveOperationsExample -configuration Debug -sdk iphonesimulator -quiet ARCHS=arm64"
   },
   "dependencies": {
-    "react": "19.1.0",
-    "react-native": "0.81.5",
-    "react-native-nitro-modules": "^0.31.10",
-    "react-native-uuid": "^2.0.3"
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-nitro-modules": "^0.37.1",
+    "react-native-uuid": "^2.0.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.3",
-    "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "20.0.0",
-    "@react-native-community/cli-platform-android": "20.0.0",
-    "@react-native-community/cli-platform-ios": "20.0.0",
-    "@react-native/babel-preset": "0.81.5",
-    "@react-native/metro-config": "0.81.5",
-    "@react-native/typescript-config": "0.81.5",
-    "react-native-builder-bob": "^0.40.16"
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/runtime": "^7.29.10",
+    "@react-native-community/cli": "20.2.0",
+    "@react-native-community/cli-platform-android": "20.2.0",
+    "@react-native-community/cli-platform-ios": "20.2.0",
+    "@react-native/babel-preset": "0.88.0",
+    "@react-native/jest-preset": "0.88.0",
+    "@react-native/metro-config": "0.88.0",
+    "@react-native/typescript-config": "0.88.0",
+    "react-native-builder-bob": "^0.43.2",
+    "react-native-monorepo-config": "^0.4.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">= 22.13.0"
   }
 }

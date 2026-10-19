@@ -38,9 +38,11 @@
             cmdline-tools-latest
             build-tools-35-0-0
             build-tools-36-0-0
+            build-tools-37-0-0
             platform-tools
             platforms-android-35
             platforms-android-36
+            platforms-android-37-0
             ndk-27-1-12297006
             ndk-27-0-12077973
             ndk-26-1-10909125
@@ -116,7 +118,7 @@
           androidSdk = androidSdkFor system;
 
           basePackages = with pkgs; [
-            yarn-berry_3
+            yarn-berry_4
             androidSdk
             nodejs_24
             jdk17

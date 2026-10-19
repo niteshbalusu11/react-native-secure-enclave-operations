@@ -9,8 +9,14 @@
   },
   "autolinking": {
     "SecureEnclaveOperations": {
-      "swift": "SecureEnclaveOperations",
-      "kotlin": "SecureEnclaveOperations"
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "SecureEnclaveOperations"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "SecureEnclaveOperations"
+      }
     }
   },
   "ignorePaths": ["node_modules"]

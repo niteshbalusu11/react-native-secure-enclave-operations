@@ -21,17 +21,14 @@ def reactNativeArchitectures() {
   return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
 }
 
-def isNewArchitectureEnabled() {
-  return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
-}
-
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
-apply from: '../nitrogen/generated/android/secureenclaveoperations+autolinking.gradle'
 
-if (isNewArchitectureEnabled()) {
-  apply plugin: "com.facebook.react"
+// AGP 9 ships built-in Kotlin support; only apply the standalone plugin when it isn't already present.
+if (project.extensions.findByName("kotlin") == null) {
+  apply plugin: "kotlin-android"
 }
+
+apply from: '../nitrogen/generated/android/secureenclaveoperations+autolinking.gradle'
 
 def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["SecureEnclaveOperations_" + name]).toInteger()
@@ -48,7 +45,7 @@ def supportsNamespace() {
 
 android {
   if (supportsNamespace()) {
-    namespace "com.margelo.nitro.secureenclaveoperations"
+    namespace = "com.margelo.nitro.secureenclaveoperations"
 
     sourceSets {
       main {
@@ -58,11 +55,10 @@ android {
   }
 
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+  ndkVersion = getExtOrDefault("ndkVersion")
 
   defaultConfig {
     minSdkVersion getExtOrIntegerDefault("minSdkVersion")
-    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
-    buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
     externalNativeBuild {
       cmake {
@@ -88,56 +84,51 @@ android {
     }
   }
 
-  packagingOptions {
-    excludes = [
-            "META-INF",
-            "META-INF/**",
-            "**/libc++_shared.so",
-            "**/libfbjni.so",
-            "**/libjsi.so",
-            "**/libfolly_json.so",
-            "**/libfolly_runtime.so",
-            "**/libglog.so",
-            "**/libhermes.so",
-            "**/libhermes-executor-debug.so",
-            "**/libhermes_executor.so",
-            "**/libreactnative.so",
-            "**/libreactnativejni.so",
-            "**/libturbomodulejsijni.so",
-            "**/libreact_nativemodule_core.so",
-            "**/libjscexecutor.so"
-    ]
+  packaging {
+    resources {
+      excludes += [
+        "META-INF",
+        "META-INF/**"
+      ]
+    }
+
+    jniLibs {
+      excludes += [
+        "**/libc++_shared.so",
+        "**/libfbjni.so",
+        "**/libjsi.so",
+        "**/libfolly_json.so",
+        "**/libfolly_runtime.so",
+        "**/libglog.so",
+        "**/libhermes.so",
+        "**/libhermes-executor-debug.so",
+        "**/libhermes_executor.so",
+        "**/libreactnative.so",
+        "**/libreactnativejni.so",
+        "**/libturbomodulejsijni.so",
+        "**/libreact_nativemodule_core.so",
+        "**/libjscexecutor.so"
+      ]
+    }
   }
 
   buildFeatures {
-    buildConfig true
-    prefab true
+    prefab = true
   }
 
   buildTypes {
     release {
-      minifyEnabled false
+      minifyEnabled = false
     }
   }
 
-  lintOptions {
+  lint {
     disable "GradleCompatible"
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  sourceSets {
-    main {
-      if (isNewArchitectureEnabled()) {
-          java.srcDirs += [
-            "generated/java",
-            "generated/jni"
-          ]
-      }
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
 }
 
