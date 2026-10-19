@@ -1765,7 +1765,7 @@ PODS:
     - React-utils (= 0.88.0)
     - ReactNativeDependencies
   - ReactNativeDependencies (0.88.0)
-  - SecureEnclaveOperations (0.0.9):
+  - SecureEnclaveOperations (0.0.10):
     - hermes-engine
     - NitroModules
     - RCTRequired
@@ -2150,7 +2150,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 7b71f4464442e9b6eae41094d11076d56c51c0e3
   ReactCommon: 145a14b942b19fc2fe38927f261955ada56978aa
   ReactNativeDependencies: d3b7423ba1e52525e42085c8470109abde583d2e
-  SecureEnclaveOperations: d99ffce8e0d17f96316a5234688540989458de76
+  SecureEnclaveOperations: 36a7f8e598e02ef6e5aa74cca0f3f0fbd30339bd
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
 
