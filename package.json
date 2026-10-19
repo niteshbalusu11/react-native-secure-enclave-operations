@@ -7,6 +7,7 @@
   "module": "./lib/module/index.js",
   "exports": {
     ".": {
+      "react-native-secure-enclave-operations-source": "./src/index.tsx",
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
