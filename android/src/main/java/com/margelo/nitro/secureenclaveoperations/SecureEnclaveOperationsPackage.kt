@@ -1,11 +1,11 @@
 package com.margelo.nitro.secureenclaveoperations
 
-import com.facebook.react.TurboReactPackage
+import com.facebook.react.BaseReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.model.ReactModuleInfoProvider
 
-class SecureEnclaveOperationsPackage : TurboReactPackage() {
+class SecureEnclaveOperationsPackage : BaseReactPackage() {
     override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
         return null
     }

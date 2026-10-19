@@ -1,6 +1,10 @@
 #include <jni.h>
 #include "secureenclaveoperationsOnLoad.hpp"
 
+#include <fbjni/fbjni.h>
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
-  return margelo::nitro::secureenclaveoperations::initialize(vm);
+  return facebook::jni::initialize(vm, []() {
+    margelo::nitro::secureenclaveoperations::registerAllNatives();
+  });
 }

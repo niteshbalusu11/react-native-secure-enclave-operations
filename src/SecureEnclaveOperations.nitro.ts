@@ -1,7 +1,9 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 
-export interface SecureEnclaveOperations
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface SecureEnclaveOperations extends HybridObject<{
+  ios: 'swift';
+  android: 'kotlin';
+}> {
   // iOS ONLY!
   // Check if hardware-backed key generation is available on this device
   isHardwareBackedKeyGenerationSupportedIos(): Promise<boolean>;
